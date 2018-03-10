@@ -1,10 +1,10 @@
-package com.gsralex.gdata.core;
+package com.gsralex.gdata;
 
 
-import com.gsralex.gdata.core.annotation.AliasField;
-import com.gsralex.gdata.core.annotation.IdField;
-import com.gsralex.gdata.core.annotation.IgnoreField;
-import com.gsralex.gdata.core.annotation.TbName;
+import com.gsralex.gdata.annotation.AliasField;
+import com.gsralex.gdata.annotation.IdField;
+import com.gsralex.gdata.annotation.IgnoreField;
+import com.gsralex.gdata.annotation.TbName;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;

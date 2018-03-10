@@ -1,8 +1,8 @@
-package com.gsralex.gdata.core.domain;
+package com.gsralex.gdata.domain;
 
-import com.gsralex.gdata.core.annotation.AliasField;
-import com.gsralex.gdata.core.annotation.IdField;
-import com.gsralex.gdata.core.annotation.TbName;
+import com.gsralex.gdata.annotation.AliasField;
+import com.gsralex.gdata.annotation.IdField;
+import com.gsralex.gdata.annotation.TbName;
 
 import java.util.Date;
 

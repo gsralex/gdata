@@ -1,4 +1,4 @@
-package com.gsralex.gdata.core.annotation;
+package com.gsralex.gdata.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -8,6 +8,8 @@ import java.lang.annotation.RetentionPolicy;
  * @date 2018/2/17
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface IgnoreField {
+public @interface IdField {
+    String name() default "";
 
+    boolean autoGenerate() default true;
 }

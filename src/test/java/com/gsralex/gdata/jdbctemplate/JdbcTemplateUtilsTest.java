@@ -1,15 +1,12 @@
-package com.gsralex.gdata.core.jdbctemplate;
+package com.gsralex.gdata.jdbctemplate;
 
-import com.gsralex.gdata.core.DataSourceConfg;
-import com.gsralex.gdata.core.domain.Foo;
-import com.gsralex.gdata.core.jdbc.JdbcUtils;
+import com.gsralex.gdata.DataSourceConfg;
+import com.gsralex.gdata.domain.Foo;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Date;
-
-import static org.junit.Assert.*;
 
 /**
  * @author gsralex

@@ -1,4 +1,4 @@
-package com.gsralex.gdata.core.annotation;
+package com.gsralex.gdata.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

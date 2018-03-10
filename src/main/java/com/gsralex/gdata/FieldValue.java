@@ -1,4 +1,4 @@
-package com.gsralex.gdata.core;
+package com.gsralex.gdata;
 
 import java.lang.reflect.Method;
 import java.util.Date;

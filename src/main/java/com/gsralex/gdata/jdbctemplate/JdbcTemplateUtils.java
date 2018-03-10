@@ -1,18 +1,15 @@
-package com.gsralex.gdata.core.jdbctemplate;
+package com.gsralex.gdata.jdbctemplate;
 
-import com.gsralex.gdata.core.FieldColumn;
-import com.gsralex.gdata.core.FieldEnum;
-import com.gsralex.gdata.core.FieldValue;
-import com.gsralex.gdata.core.SqlCuHelper;
+import com.gsralex.gdata.FieldColumn;
+import com.gsralex.gdata.FieldValue;
+import com.gsralex.gdata.FieldEnum;
+import com.gsralex.gdata.SqlCuHelper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;

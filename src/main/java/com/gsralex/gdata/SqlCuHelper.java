@@ -1,6 +1,5 @@
-package com.gsralex.gdata.core;
+package com.gsralex.gdata;
 
-import com.gsralex.gdata.core.annotation.IdField;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;

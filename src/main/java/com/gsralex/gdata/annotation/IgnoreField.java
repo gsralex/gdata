@@ -1,14 +1,13 @@
-package com.gsralex.gdata.core.annotation;
+package com.gsralex.gdata.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
  * @author gsralex
- * @date 2018/2/18
+ * @date 2018/2/17
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TbName {
+public @interface IgnoreField {
 
-    String name() default "";
 }

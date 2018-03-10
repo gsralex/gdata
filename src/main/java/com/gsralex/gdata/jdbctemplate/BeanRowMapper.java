@@ -1,6 +1,6 @@
-package com.gsralex.gdata.core.jdbctemplate;
+package com.gsralex.gdata.jdbctemplate;
 
-import com.gsralex.gdata.core.SqlRHelper;
+import com.gsralex.gdata.SqlRHelper;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;

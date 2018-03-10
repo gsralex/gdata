@@ -1,4 +1,4 @@
-package com.gsralex.gdata.core.domain;
+package com.gsralex.gdata.domain;
 
 import java.util.ArrayList;
 import java.util.Date;

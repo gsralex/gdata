@@ -1,4 +1,4 @@
-package com.gsralex.gdata.core;
+package com.gsralex.gdata;
 
 import org.apache.commons.dbcp.BasicDataSource;
 
