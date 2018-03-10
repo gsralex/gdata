@@ -1,0 +1,8 @@
+# java idea
+*.class
+*.iml
+classes
+logs
+out
+target
+.idea
