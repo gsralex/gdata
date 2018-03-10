@@ -1,19 +1,22 @@
 package com.gsralex.gdata.core;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author gsralex
  * @date 2018/2/18
  */
-public class FieldMapper {
+public class ModelMap {
 
     private String tableName;
     private Map<String, FieldColumn> mapper;
+    private Map<FieldEnum, List<FieldColumn>> fieldMapper;
 
-    public FieldMapper() {
+    public ModelMap() {
         mapper = new HashMap<>();
+        fieldMapper = new HashMap<>();
     }
 
     public String getTableName() {
@@ -24,11 +27,13 @@ public class FieldMapper {
         this.tableName = tableName;
     }
 
+
     public Map<String, FieldColumn> getMapper() {
         return mapper;
     }
 
-    public void setMapper(Map<String, FieldColumn> mapper) {
-        this.mapper = mapper;
+    public Map<FieldEnum, List<FieldColumn>> getFieldMapper() {
+        return fieldMapper;
     }
+
 }

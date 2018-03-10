@@ -1,6 +1,7 @@
 package com.gsralex.gdata.core;
 
 import java.lang.reflect.Method;
+import java.util.Date;
 
 /**
  * @author gsralex
@@ -21,7 +22,7 @@ public class FieldValue {
     }
 
 
-    public <T> T getValue(Class<T> fieldType, String fieldName)  {
+    public <T> T getValue(Class<T> fieldType, String fieldName) {
         try {
             String typeName = fieldType.getTypeName();
             Method method = null;
@@ -42,21 +43,22 @@ public class FieldValue {
                 }
             }
             return (T) method.invoke(instance);
-        }catch (Throwable e){
+        } catch (Throwable e) {
             return null;
         }
     }
 
 
-    public <T> void setValue(Class<T> fieldType, String fieldName, T value)  {
+    public void setValue(Class fieldType, String fieldName, Object value) {
         try {
             String setMethodName = getSetMethodName(fieldName);
             Method method = type.getMethod(setMethodName, fieldType);
             method.invoke(instance, value);
-        }catch(Throwable e){
+        } catch (Throwable e) {
             return;
         }
     }
+
 
     private static String getGetMethodName(String fieldName) {
         return "get" + getPostMethodName(fieldName);

@@ -10,4 +10,6 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IdField {
     String name() default "";
+
+    boolean autoGenerate() default true;
 }

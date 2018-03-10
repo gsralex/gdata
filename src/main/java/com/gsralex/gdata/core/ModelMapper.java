@@ -1,7 +1,6 @@
 package com.gsralex.gdata.core;
 
 
-
 import com.gsralex.gdata.core.annotation.AliasField;
 import com.gsralex.gdata.core.annotation.IdField;
 import com.gsralex.gdata.core.annotation.IgnoreField;
@@ -18,13 +17,20 @@ import java.util.Map;
  */
 public class ModelMapper {
 
-    private static Map<String, FieldMapper> cacheMapper = new HashMap<>();
+    private static Map<String, ModelMap> cacheMapper = new HashMap<>();
 
-    public static FieldMapper getMapper(Class type) {
+    public static ModelMap getMapperCache(Class type) {
         String className = type.getName();
         if (cacheMapper.containsKey(className)) {
             return cacheMapper.get(className);
         }
+        ModelMap fieldMapper = getMapper(type);
+        cacheMapper.put(className, fieldMapper);
+        return fieldMapper;
+    }
+
+    private static ModelMap getMapper(Class type) {
+        String className = type.getName();
         String tableName;
         TbName tbName = (TbName) type.getAnnotation(TbName.class);
         if (tbName != null) {
@@ -33,25 +39,23 @@ public class ModelMapper {
             tableName = className;
         }
 
-        FieldMapper fieldMapper = new FieldMapper();
+        ModelMap fieldMapper = new ModelMap();
         fieldMapper.setTableName(tableName);
         Field[] fields = type.getDeclaredFields();
         for (Field field : fields) {
             String filedName = field.getName();
-            String typeName = field.getGenericType().getTypeName();
             IgnoreField ignoreField = field.getAnnotation(IgnoreField.class);
             if (ignoreField != null) {
                 continue;
             }
-
             FieldColumn column = new FieldColumn();
             IdField idField = field.getAnnotation(IdField.class);
             if (idField != null) {
                 column.setId(true);
                 column.setName(field.getName());
-                if(!StringUtils.isEmpty(idField.name())){
+                if (!StringUtils.isEmpty(idField.name())) {
                     column.setAliasName(idField.name());
-                }else{
+                } else {
                     column.setAliasName(field.getName());
                 }
             }
@@ -70,7 +74,6 @@ public class ModelMapper {
             }
             fieldMapper.getMapper().put(filedName, column);
         }
-        cacheMapper.put(tableName, fieldMapper);
         return fieldMapper;
     }
 
