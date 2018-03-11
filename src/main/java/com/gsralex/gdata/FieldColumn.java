@@ -9,7 +9,7 @@ public class FieldColumn {
     private boolean id;
     private boolean alias;
     private String aliasName;
-    private String typeName;
+    private Class type;
 
 
     public String getName() {
@@ -44,11 +44,11 @@ public class FieldColumn {
         this.aliasName = aliasName;
     }
 
-    public String getTypeName() {
-        return typeName;
+    public Class getType() {
+        return type;
     }
 
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
+    public void setType(Class type) {
+        this.type = type;
     }
 }

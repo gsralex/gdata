@@ -29,7 +29,7 @@ public class JdbcTemplateUtilsTest {
         foo1.setFoo2(123.13);
         foo1.setFoo3(new Date());
         foo1.setFoo4(1);
-        Assert.assertEquals(true, templateUtils.insert(foo1));
+        Assert.assertEquals(true, templateUtils.insertGeneratedKey(foo1));
     }
 
     @Test
@@ -49,7 +49,14 @@ public class JdbcTemplateUtilsTest {
 
     @Test
     public void get() throws Exception {
-
+        Foo foo1 = new Foo();
+        foo1.setFoo1("1234");
+        foo1.setFoo2(123.13);
+        foo1.setFoo3(new Date());
+        foo1.setFoo4(1);
+        Assert.assertEquals(true, templateUtils.insertGeneratedKey(foo1));
+        Foo foo1Data = templateUtils.get("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
+        Assert.assertNotEquals(foo1Data, null);
     }
 
     @Test

@@ -14,13 +14,13 @@ public class SqlCuHelper {
 
 
     public <T> Object[] getInsertObjects(T t) {
-        ModelMap mapper = ModelMapper.getMapperCache(t.getClass());
-        FieldValue fieldValue = new FieldValue(t, t.getClass());
+        ModelMap modelMap = ModelMapper.getMapperCache(t.getClass());
+        FieldValue fieldValue = new FieldValue(t, modelMap);
         List<Object> objects = new ArrayList<>();
-        for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
+        for (Map.Entry<String, FieldColumn> entry : modelMap.getMapper().entrySet()) {
             FieldColumn column = entry.getValue();
             if (!column.isId()) {
-                Object value = fieldValue.getValue(entry.getValue().getClass(), entry.getKey());
+                Object value = fieldValue.getValue(entry.getKey());
                 objects.add(value);
             }
         }
@@ -82,21 +82,21 @@ public class SqlCuHelper {
     }
 
     public <T> Object[] getUpdateObjects(T t) {
-        ModelMap mapper = ModelMapper.getMapperCache(t.getClass());
-        FieldValue fieldValue = new FieldValue(t, t.getClass());
+        ModelMap modelMap = ModelMapper.getMapperCache(t.getClass());
+        FieldValue fieldValue = new FieldValue(t, modelMap);
         List<Object> objects = new ArrayList<>();
 
-        for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
+        for (Map.Entry<String, FieldColumn> entry : modelMap.getMapper().entrySet()) {
             FieldColumn column = entry.getValue();
             if (!column.isId()) {
-                Object value = fieldValue.getValue(entry.getValue().getClass(), entry.getKey());
+                Object value = fieldValue.getValue(entry.getKey());
                 objects.add(value);
             }
         }
-        for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
+        for (Map.Entry<String, FieldColumn> entry : modelMap.getMapper().entrySet()) {
             FieldColumn column = entry.getValue();
             if (column.isId()) {
-                Object value = fieldValue.getValue(entry.getValue().getClass(), entry.getKey());
+                Object value = fieldValue.getValue(entry.getKey());
                 objects.add(value);
             }
         }

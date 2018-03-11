@@ -1,9 +1,6 @@
 package com.gsralex.gdata.jdbctemplate;
 
-import com.gsralex.gdata.FieldColumn;
-import com.gsralex.gdata.FieldValue;
-import com.gsralex.gdata.FieldEnum;
-import com.gsralex.gdata.SqlCuHelper;
+import com.gsralex.gdata.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -21,7 +18,11 @@ import java.util.Map;
  */
 public class JdbcTemplateUtils {
 
+
+    private static final String GENERATED_KEY = "GENERATED_KEY";
+
     private JdbcTemplate jdbcTemplate;
+
 
     public JdbcTemplateUtils(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -37,24 +38,29 @@ public class JdbcTemplateUtils {
         return jdbcTemplate.update(sql, objects) != 0 ? true : false;
     }
 
-    public <T> boolean insertWithGeneratedKey(T t) {
-        if(t==null){
+    public <T> boolean insertGeneratedKey(T t) {
+        if (t == null) {
             return false;
         }
         SqlCuHelper helper = new SqlCuHelper();
         String sql = helper.getInsertSql(t.getClass());
+        Object[] objects = helper.getInsertObjects(t);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int r = jdbcTemplate.update(conn -> {
-            PreparedStatement ps = conn.prepareStatement(sql);
+            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            for (int i = 0, length = objects.length; i < length; i++) {
+                ps.setObject(i + 1, objects[i]);
+            }
             return ps;
         }, keyHolder);
 
         List<FieldColumn> columnList = helper.getColumns(t.getClass(), FieldEnum.Id);
         Map<String, Object> keyMap = keyHolder.getKeyList().get(0);
-        FieldValue fieldValue = new FieldValue(t, t.getClass());
+        ModelMap modelMap = ModelMapper.getMapperCache(t.getClass());
+        FieldValue fieldValue = new FieldValue(t, modelMap);
         for (FieldColumn column : columnList) {
-            Object key = keyMap.get(column.getAliasName());
-            fieldValue.setValue(key.getClass(), column.getName(), key);
+            Object key = keyMap.get(GENERATED_KEY);
+            fieldValue.setValue(column.getName(), key);
         }
         return r != 0 ? true : false;
     }

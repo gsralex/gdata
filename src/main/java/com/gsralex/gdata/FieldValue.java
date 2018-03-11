@@ -1,7 +1,6 @@
 package com.gsralex.gdata;
 
 import java.lang.reflect.Method;
-import java.util.Date;
 
 /**
  * @author gsralex
@@ -11,10 +10,12 @@ public class FieldValue {
 
     private Object instance;
     private Class type;
+    private ModelMap modelMap;
 
-    public FieldValue(Object instance, Class type) {
+    public FieldValue(Object instance, ModelMap modelMap) {
         this.instance = instance;
-        this.type = type;
+        this.modelMap = modelMap;
+        this.type = modelMap.getType();
     }
 
     public Object getInstance() {
@@ -22,7 +23,12 @@ public class FieldValue {
     }
 
 
-    public <T> T getValue(Class<T> fieldType, String fieldName) {
+    public <T> T getValue(String fieldName) {
+        FieldColumn column = modelMap.getMapper().get(fieldName);
+        return (T) getValue(column.getType(), fieldName);
+    }
+
+    private <T> T getValue(Class<T> fieldType, String fieldName) {
         try {
             String typeName = fieldType.getTypeName();
             Method method = null;
@@ -49,10 +55,16 @@ public class FieldValue {
     }
 
 
-    public void setValue(Class fieldType, String fieldName, Object value) {
+    public void setValue(String fieldName, Object value) {
+        FieldColumn column = modelMap.getMapper().get(fieldName);
+        setValue(column.getType(), fieldName, value);
+    }
+
+
+    private void setValue(Class fieldType, String fieldName, Object value) {
         try {
             String setMethodName = getSetMethodName(fieldName);
-            Method method = type.getMethod(setMethodName, fieldType);
+            Method method = type.getDeclaredMethod(setMethodName, fieldType);
             method.invoke(instance, value);
         } catch (Throwable e) {
             return;

@@ -3,7 +3,6 @@ package com.gsralex.gdata.jdbc;
 
 import com.gsralex.gdata.SqlCuHelper;
 import com.gsralex.gdata.SqlRHelper;
-import com.gsralex.gdata.core.*;
 import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;

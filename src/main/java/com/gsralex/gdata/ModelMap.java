@@ -11,6 +11,7 @@ import java.util.Map;
 public class ModelMap {
 
     private String tableName;
+    private Class type;
     private Map<String, FieldColumn> mapper;
     private Map<FieldEnum, List<FieldColumn>> fieldMapper;
 
@@ -27,6 +28,13 @@ public class ModelMap {
         this.tableName = tableName;
     }
 
+    public Class getType() {
+        return type;
+    }
+
+    public void setType(Class type) {
+        this.type = type;
+    }
 
     public Map<String, FieldColumn> getMapper() {
         return mapper;

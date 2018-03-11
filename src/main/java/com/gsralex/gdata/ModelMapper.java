@@ -8,7 +8,9 @@ import com.gsralex.gdata.annotation.TbName;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,8 +41,9 @@ public class ModelMapper {
             tableName = className;
         }
 
-        ModelMap fieldMapper = new ModelMap();
-        fieldMapper.setTableName(tableName);
+        ModelMap modelMap = new ModelMap();
+        modelMap.setType(type);
+        modelMap.setTableName(tableName);
         Field[] fields = type.getDeclaredFields();
         for (Field field : fields) {
             String filedName = field.getName();
@@ -49,6 +52,7 @@ public class ModelMapper {
                 continue;
             }
             FieldColumn column = new FieldColumn();
+            column.setType(field.getType());
             IdField idField = field.getAnnotation(IdField.class);
             if (idField != null) {
                 column.setId(true);
@@ -58,23 +62,37 @@ public class ModelMapper {
                 } else {
                     column.setAliasName(field.getName());
                 }
+
+                addFieldMap(FieldEnum.Id, column, modelMap);
             }
             AliasField aliasField = field.getAnnotation(AliasField.class);
             if (aliasField != null) {
                 column.setAlias(true);
                 column.setName(field.getName());
                 column.setAliasName(aliasField.name());
+                addFieldMap(FieldEnum.Alias, column, modelMap);
             }
 
             if (!column.isId()) {
                 if (!column.isAlias()) {
                     column.setName(field.getName());
                     column.setAliasName(field.getName());
+                    addFieldMap(FieldEnum.Alias, column, modelMap);
                 }
             }
-            fieldMapper.getMapper().put(filedName, column);
+            modelMap.getMapper().put(filedName, column);
         }
-        return fieldMapper;
+        return modelMap;
+    }
+
+    private static void addFieldMap(FieldEnum fieldEnum, FieldColumn column, ModelMap modelMap) {
+        if (modelMap.getFieldMapper().containsKey(fieldEnum)) {
+            modelMap.getFieldMapper().get(fieldEnum).add(column);
+        } else {
+            List<FieldColumn> list = new ArrayList<>();
+            list.add(column);
+            modelMap.getFieldMapper().put(fieldEnum, list);
+        }
     }
 
 }
