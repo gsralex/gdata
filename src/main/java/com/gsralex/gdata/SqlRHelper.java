@@ -34,9 +34,6 @@ public class SqlRHelper {
                 String fieldName = item.getKey();
                 String columnName = item.getValue().getAliasName();
                 Class type = item.getValue().getType();
-                //因为resultset double类型返回的是bigdecimal；
-                //所以这里每个都做判断；
-                //而不是直接用fieldValue.setValue(fieldName, rs.getObject(columnName));
                 if (type == int.class || type == Integer.class) {
                     fieldValue.setValue(fieldName, rs.getInt(columnName));
                 } else if (type == float.class || type == Float.class) {
