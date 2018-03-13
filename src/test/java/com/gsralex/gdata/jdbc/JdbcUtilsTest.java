@@ -8,7 +8,7 @@ import org.junit.Test;
 
 /**
  * @author gsralex
- * @date 2018/3/10
+ * 2018/3/10
  */
 public class JdbcUtilsTest {
 

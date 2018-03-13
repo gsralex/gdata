@@ -6,7 +6,7 @@ import javax.sql.DataSource;
 
 /**
  * @author gsralex
- * @date 2018/3/10
+ * 2018/3/10
  */
 public class DataSourceConfg {
 

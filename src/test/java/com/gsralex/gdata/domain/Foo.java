@@ -8,7 +8,7 @@ import java.util.Date;
 
 /**
  * @author gsralex
- * @date 2018/3/10
+ * 2018/3/10
  */
 @TbName(name = "t_foo")
 public class Foo {

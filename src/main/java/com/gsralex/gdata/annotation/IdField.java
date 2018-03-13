@@ -5,7 +5,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * @author gsralex
- * @date 2018/2/17
+ * 2018/2/17
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IdField {
