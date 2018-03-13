@@ -1,12 +1,14 @@
 package com.gsralex.gdata.jdbctemplate;
 
 import com.gsralex.gdata.*;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.Map;
 
 /**
  * @author gsralex
- * 2018/3/10
+ *         2018/3/10
  */
 public class JdbcTemplateUtils {
 
@@ -22,29 +24,44 @@ public class JdbcTemplateUtils {
     private static final String GENERATED_KEY = "GENERATED_KEY";
 
     private JdbcTemplate jdbcTemplate;
+    private SqlCuHelper cuHelper;
+    private SqlRHelper rHelper;
 
 
     public JdbcTemplateUtils(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.cuHelper=new SqlCuHelper();
+        this.rHelper=new SqlRHelper();
     }
 
+
     public <T> boolean insert(T t) {
+        return insert(t, false);
+    }
+
+    public <T> boolean insert(T t, boolean generatedKey) {
         if (t == null) {
             return false;
         }
-        SqlCuHelper helper = new SqlCuHelper();
-        String sql = helper.getInsertSql(t.getClass());
-        Object[] objects = helper.getInsertObjects(t);
+        if (generatedKey) {
+            return insertGeneratedKey(t);
+        } else {
+            return insertBean(t);
+        }
+    }
+
+    private <T> boolean insertBean(T t) {
+        if (t == null) {
+            return false;
+        }
+        String sql = cuHelper.getInsertSql(t.getClass());
+        Object[] objects = cuHelper.getInsertObjects(t);
         return jdbcTemplate.update(sql, objects) != 0 ? true : false;
     }
 
-    public <T> boolean insertGeneratedKey(T t) {
-        if (t == null) {
-            return false;
-        }
-        SqlCuHelper helper = new SqlCuHelper();
-        String sql = helper.getInsertSql(t.getClass());
-        Object[] objects = helper.getInsertObjects(t);
+    private <T> boolean insertGeneratedKey(T t) {
+        String sql = cuHelper.getInsertSql(t.getClass());
+        Object[] objects = cuHelper.getInsertObjects(t);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int r = jdbcTemplate.update(conn -> {
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -54,13 +71,15 @@ public class JdbcTemplateUtils {
             return ps;
         }, keyHolder);
 
-        List<FieldColumn> columnList = helper.getColumns(t.getClass(), FieldEnum.Id);
-        Map<String, Object> keyMap = keyHolder.getKeyList().get(0);
-        ModelMap modelMap = ModelMapper.getMapperCache(t.getClass());
-        FieldValue fieldValue = new FieldValue(t, modelMap);
-        for (FieldColumn column : columnList) {
-            Object key = keyMap.get(GENERATED_KEY);
-            fieldValue.setValue(column.getName(), key);
+        List<FieldColumn> columnList = cuHelper.getColumns(t.getClass(), FieldEnum.Id);
+        if (columnList.size() != 0) {
+            Map<String, Object> keyMap = keyHolder.getKeyList().get(0);
+            ModelMap modelMap = ModelMapper.getMapperCache(t.getClass());
+            FieldValue fieldValue = new FieldValue(t, modelMap);
+            for (FieldColumn column : columnList) {
+                Object key = keyMap.get(GENERATED_KEY);
+                fieldValue.setValue(column.getName(), key);
+            }
         }
         return r != 0 ? true : false;
     }
@@ -69,12 +88,10 @@ public class JdbcTemplateUtils {
         if (list == null || list.size() == 0) {
             return 0;
         }
-        SqlCuHelper modelUtils = new SqlCuHelper();
-        Class<T> type = (Class<T>) list.get(0).getClass();
-        String sql = modelUtils.getInsertSql(type);
+        String sql = cuHelper.getInsertSql(TypeUtils.getType(list));
         List<Object[]> argList = new ArrayList<>();
         for (T item : list) {
-            argList.add(modelUtils.getInsertObjects(item));
+            argList.add(cuHelper.getInsertObjects(item));
         }
         return getOkResult(jdbcTemplate.batchUpdate(sql, argList));
     }
@@ -100,9 +117,8 @@ public class JdbcTemplateUtils {
     }
 
     public <T> int batchUpdate(List<T> list) {
-        if (list == null || list.size() == 0) {
+        if (list == null || list.size() == 0)
             return 0;
-        }
         SqlCuHelper modelUtils = new SqlCuHelper();
         Class<T> type = (Class<T>) list.get(0).getClass();
         String sql = modelUtils.getUpdateSql(type);

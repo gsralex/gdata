@@ -1,6 +1,7 @@
 package com.gsralex.gdata.jdbc;
 
 import com.gsralex.gdata.DataSourceConfg;
+import com.gsralex.gdata.domain.Foo;
 import com.gsralex.gdata.domain.FooSource;
 import org.junit.Assert;
 import org.junit.Before;
@@ -8,7 +9,7 @@ import org.junit.Test;
 
 /**
  * @author gsralex
- * 2018/3/10
+ *         2018/3/10
  */
 public class JdbcUtilsTest {
 
@@ -24,6 +25,11 @@ public class JdbcUtilsTest {
     @Test
     public void save() throws Exception {
         Assert.assertEquals(true, jdbcUtils.insert(FooSource.getEntity()));
+
+        Foo foo = FooSource.getEntity();
+        jdbcUtils.insert(foo, true);
+        Assert.assertNotEquals(0, foo.getId());
+
     }
 
     @Test
