@@ -7,6 +7,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 /**
  * @author gsralex
  *         2018/3/10
@@ -34,7 +36,12 @@ public class JdbcUtilsTest {
 
     @Test
     public void batchSave() throws Exception {
-        Assert.assertEquals(jdbcUtils.batchInsert(FooSource.getEntityList()), 2);
+        List<Foo> list = FooSource.getEntityList();
+        int r = jdbcUtils.batchInsert(list, true);
+        Assert.assertEquals(r, 2);
+        Assert.assertNotEquals(list.get(0).getId(), 0);
+        Assert.assertEquals(list.get(0).getId() < list.get(1).getId(), true);
+
     }
 
     @Test

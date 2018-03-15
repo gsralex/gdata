@@ -4,18 +4,16 @@ import java.lang.reflect.Method;
 
 /**
  * @author gsralex
- * 2018/2/22
+ *         2018/2/22
  */
 public class FieldValue {
 
     private Object instance;
     private Class type;
-    private ModelMap modelMap;
 
-    public FieldValue(Object instance, ModelMap modelMap) {
+    public FieldValue(Object instance) {
         this.instance = instance;
-        this.modelMap = modelMap;
-        this.type = modelMap.getType();
+        this.type = instance.getClass();
     }
 
     public Object getInstance() {
@@ -23,12 +21,7 @@ public class FieldValue {
     }
 
 
-    public <T> T getValue(String fieldName) {
-        FieldColumn column = modelMap.getMapper().get(fieldName);
-        return (T) getValue(column.getType(), fieldName);
-    }
-
-    private <T> T getValue(Class<T> fieldType, String fieldName) {
+    public <T> T getValue(Class<T> fieldType, String fieldName) {
         try {
             String typeName = fieldType.getTypeName();
             Method method = null;
@@ -55,13 +48,7 @@ public class FieldValue {
     }
 
 
-    public void setValue(String fieldName, Object value) {
-        FieldColumn column = modelMap.getMapper().get(fieldName);
-        setValue(column.getType(), fieldName, value);
-    }
-
-
-    private void setValue(Class fieldType, String fieldName, Object value) {
+    public void setValue(Class fieldType, String fieldName, Object value) {
         try {
             String setMethodName = getSetMethodName(fieldName);
             Method method = type.getDeclaredMethod(setMethodName, fieldType);

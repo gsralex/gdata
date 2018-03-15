@@ -1,6 +1,7 @@
 package com.gsralex.gdata.jdbctemplate;
 
 import com.gsralex.gdata.*;
+import com.gsralex.gdata.constant.JdbcConstants;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -12,7 +13,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author gsralex
@@ -21,17 +21,15 @@ import java.util.Map;
 public class JdbcTemplateUtils {
 
 
-    private static final String GENERATED_KEY = "GENERATED_KEY";
-
     private JdbcTemplate jdbcTemplate;
-    private SqlCuHelper cuHelper;
-    private SqlRHelper rHelper;
+    private SqlInsertHelper insertHelper;
+    private SqlUpdateHelper updateHelper;
 
 
     public JdbcTemplateUtils(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.cuHelper=new SqlCuHelper();
-        this.rHelper=new SqlRHelper();
+        this.insertHelper = new SqlInsertHelper();
+        this.updateHelper = new SqlUpdateHelper();
     }
 
 
@@ -51,17 +49,14 @@ public class JdbcTemplateUtils {
     }
 
     private <T> boolean insertBean(T t) {
-        if (t == null) {
-            return false;
-        }
-        String sql = cuHelper.getInsertSql(t.getClass());
-        Object[] objects = cuHelper.getInsertObjects(t);
+        String sql = insertHelper.getInsertSql(t.getClass());
+        Object[] objects = insertHelper.getInsertObjects(t);
         return jdbcTemplate.update(sql, objects) != 0 ? true : false;
     }
 
     private <T> boolean insertGeneratedKey(T t) {
-        String sql = cuHelper.getInsertSql(t.getClass());
-        Object[] objects = cuHelper.getInsertObjects(t);
+        String sql = insertHelper.getInsertSql(t.getClass());
+        Object[] objects = insertHelper.getInsertObjects(t);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int r = jdbcTemplate.update(conn -> {
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -71,62 +66,78 @@ public class JdbcTemplateUtils {
             return ps;
         }, keyHolder);
 
-        List<FieldColumn> columnList = cuHelper.getColumns(t.getClass(), FieldEnum.Id);
+
+        List<FieldColumn> columnList = insertHelper.getColumns(t.getClass(), FieldEnum.Id);
         if (columnList.size() != 0) {
-            Map<String, Object> keyMap = keyHolder.getKeyList().get(0);
-            ModelMap modelMap = ModelMapper.getMapperCache(t.getClass());
-            FieldValue fieldValue = new FieldValue(t, modelMap);
+            Object key = keyHolder.getKeyList().get(0).get(JdbcConstants.GENERATED_KEY);
+            FieldValue fieldValue = new FieldValue(t);
             for (FieldColumn column : columnList) {
-                Object key = keyMap.get(GENERATED_KEY);
-                fieldValue.setValue(column.getName(), key);
+                fieldValue.setValue(column.getType(), column.getName(), key);
             }
         }
         return r != 0 ? true : false;
     }
 
     public <T> int batchInsert(List<T> list) {
+        return 0;
+    }
+
+    public <T> int batchInsert(List<T> list, boolean generatedKey) {
         if (list == null || list.size() == 0) {
             return 0;
         }
-        String sql = cuHelper.getInsertSql(TypeUtils.getType(list));
-        List<Object[]> argList = new ArrayList<>();
-        for (T item : list) {
-            argList.add(cuHelper.getInsertObjects(item));
-        }
-        return getOkResult(jdbcTemplate.batchUpdate(sql, argList));
+        return 0;
     }
 
-    private static int getOkResult(int[] r) {
-        int cnt = 0;
-        for (int item : r) {
-            if (item != Statement.EXECUTE_FAILED) {
-                cnt++;
-            }
+    public <T> int batchInsertBean(List<T> list) {
+        String sql = insertHelper.getInsertSql(TypeUtils.getType(list));
+        List<Object[]> argList = new ArrayList<>();
+        for (T item : list) {
+            argList.add(insertHelper.getInsertObjects(item));
         }
-        return cnt;
+        return JdbcHelper.getBatchResult(jdbcTemplate.batchUpdate(sql, argList));
     }
+
+    public <T> int batchInsertGeneratedKey(List<T> list) {
+        String sql = insertHelper.getInsertSql(TypeUtils.getType(list));
+        List<Object[]> argList = new ArrayList<>();
+        for (T item : list) {
+            argList.add(insertHelper.getInsertObjects(item));
+        }
+        return JdbcHelper.getBatchResult(jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+
+            @Override
+            public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
+
+            }
+
+            @Override
+            public int getBatchSize() {
+                return 0;
+            }
+        }));
+    }
+
 
     public <T> boolean update(T t) {
         if (t == null) {
             return false;
         }
-        SqlCuHelper modelUtils = new SqlCuHelper();
-        String sql = modelUtils.getUpdateSql(t.getClass());
-        Object[] objects = modelUtils.getUpdateObjects(t);
+        String sql = updateHelper.getUpdateSql(t.getClass());
+        Object[] objects = updateHelper.getUpdateObjects(t);
         return jdbcTemplate.update(sql, objects) != 0 ? true : false;
     }
 
     public <T> int batchUpdate(List<T> list) {
         if (list == null || list.size() == 0)
             return 0;
-        SqlCuHelper modelUtils = new SqlCuHelper();
         Class<T> type = (Class<T>) list.get(0).getClass();
-        String sql = modelUtils.getUpdateSql(type);
+        String sql = updateHelper.getUpdateSql(type);
         List<Object[]> argList = new ArrayList<>();
         for (T item : list) {
-            argList.add(modelUtils.getUpdateObjects(item));
+            argList.add(updateHelper.getUpdateObjects(item));
         }
-        return getOkResult(jdbcTemplate.batchUpdate(sql, argList));
+        return JdbcHelper.getBatchResult(jdbcTemplate.batchUpdate(sql, argList));
     }
 
 

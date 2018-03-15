@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
  * 2018/2/17
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AliasField {
+public @interface LabelField {
 
     String name() default "";
 }

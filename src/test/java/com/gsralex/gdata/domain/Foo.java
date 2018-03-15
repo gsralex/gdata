@@ -1,6 +1,6 @@
 package com.gsralex.gdata.domain;
 
-import com.gsralex.gdata.annotation.AliasField;
+import com.gsralex.gdata.annotation.LabelField;
 import com.gsralex.gdata.annotation.IdField;
 import com.gsralex.gdata.annotation.TbName;
 
@@ -16,16 +16,16 @@ public class Foo {
     @IdField
     private long id;
 
-    @AliasField(name = "foo_1")
+    @LabelField(name = "foo_1")
     private String foo1;
 
-    @AliasField(name = "foo_2")
+    @LabelField(name = "foo_2")
     private double foo2;
 
-    @AliasField(name = "foo_3")
+    @LabelField(name = "foo_3")
     private Date foo3;
 
-    @AliasField(name = "foo_4")
+    @LabelField(name = "foo_4")
     private int foo4;
 
     public long getId() {

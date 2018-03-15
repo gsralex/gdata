@@ -2,11 +2,13 @@ package com.gsralex.gdata.jdbc;
 
 
 import com.gsralex.gdata.*;
+import com.gsralex.gdata.constant.JdbcConstants;
 import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,14 +21,16 @@ public class JdbcUtils {
     private static Logger LOGGER = Logger.getLogger(JdbcUtils.class);
 
     private DataSource dataSource;
-    private SqlCuHelper cudHelper;
-    private SqlRHelper rHelper;
+    private SqlInsertHelper insertHelper;
+    private SqlUpdateHelper updateHelper;
+    private SqlMapperHelper rHelper;
 
 
     public JdbcUtils(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.cudHelper = new SqlCuHelper();
-        this.rHelper = new SqlRHelper();
+        this.insertHelper = new SqlInsertHelper();
+        this.updateHelper = new SqlUpdateHelper();
+        this.rHelper = new SqlMapperHelper();
     }
 
     public <T> boolean insert(T t) {
@@ -48,22 +52,22 @@ public class JdbcUtils {
         if (t == null) {
             return false;
         }
-        Object[] objects = cudHelper.getInsertObjects(t);
-        String sql = cudHelper.getInsertSql(t.getClass());
+        Object[] objects = insertHelper.getInsertObjects(t);
+        String sql = insertHelper.getInsertSql(t.getClass());
         return executeUpdate(sql, objects) != 0 ? true : false;
     }
 
     private <T> boolean insertGeneratedKey(T t) {
-        Object[] objects = cudHelper.getInsertObjects(t);
-        String sql = cudHelper.getInsertSql(t.getClass());
-        Object key = executeUpdateGenerateKey(sql, objects);
-        if (key != null) {
-            List<FieldColumn> columnList = cudHelper.getColumns(t.getClass(), FieldEnum.Id);
+        Object[] objects = insertHelper.getInsertObjects(t);
+        String sql = insertHelper.getInsertSql(t.getClass());
+        JdbcGeneratedKey generatedKey = executeUpdateGenerateKey(sql, objects);
+        if (generatedKey != null) {
+            List<FieldColumn> columnList = insertHelper.getColumns(t.getClass(), FieldEnum.Id);
             if (columnList.size() != 0) {
-                ModelMap modelMap = ModelMapper.getMapperCache(t.getClass());
-                FieldValue fieldValue = new FieldValue(t, modelMap);
+                FieldValue fieldValue = new FieldValue(t);
+                Object key = generatedKey.getKeyList().get(0).get(JdbcConstants.GENERATED_KEY);
                 for (FieldColumn column : columnList) {
-                    fieldValue.setValue(column.getName(), key);
+                    fieldValue.setValue(column.getType(), column.getName(), key);
                 }
             }
             return true;
@@ -73,23 +77,114 @@ public class JdbcUtils {
     }
 
     public <T> int batchInsert(List<T> list) {
+        return batchInsert(list, false);
+    }
+
+    public <T> int batchInsert(List<T> list, boolean generatedKey) {
         if (list == null || list.size() == 0)
             return 0;
-        Class<T> type = (Class<T>) list.get(0).getClass();
-        String sql = cudHelper.getInsertSql(type);
+        if (generatedKey) {
+            return batchInsertGeneratedKey(list);
+        } else {
+            return batchInsertBean(list);
+        }
+    }
+
+    private <T> int batchInsertBean(List<T> list) {
+        String sql = insertHelper.getInsertSql(TypeUtils.getType(list));
         List<Object[]> objectList = new ArrayList<>();
         for (T t : list) {
-            objectList.add(cudHelper.getInsertObjects(t));
+            objectList.add(insertHelper.getInsertObjects(t));
         }
         return executeBatch(sql, objectList);
+    }
+
+    private <T> int batchInsertGeneratedKey(List<T> list) {
+        String sql = insertHelper.getInsertSql(TypeUtils.getType(list));
+        List<Object[]> objectList = new ArrayList<>();
+        for (T t : list) {
+            objectList.add(insertHelper.getInsertObjects(t));
+        }
+        JdbcGeneratedKey generatedKey = executeBatchGeneratedKey(sql, objectList);
+        if (generatedKey != null) {
+            int i = 0;
+            for (T t : list) {
+                FieldValue fieldValue = new FieldValue(t);
+                List<FieldColumn> columnList = insertHelper.getColumns(t.getClass(), FieldEnum.Id);
+                for (FieldColumn column : columnList) {
+                    Object value = generatedKey.get(i++).get(JdbcConstants.GENERATED_KEY);
+                    fieldValue.setValue(column.getType(), column.getName(), value);
+                }
+            }
+            return generatedKey.getR();
+        }
+        return 0;
+    }
+
+
+    public JdbcGeneratedKey executeUpdateGenerateKey(String sql, Object[] objects) {
+        PreparedStatement ps = null;
+        try {
+            ps = pre(sql, objects, true);
+            int r = ps.executeUpdate();
+            if (r != 0) {
+                return getGeneratedKey(ps.getGeneratedKeys(), r);
+            }
+        } catch (SQLException e) {
+            LOGGER.error("JdbcUtils.executeUpdate", e);
+        } finally {
+            close(ps);
+        }
+        return null;
+    }
+
+    public JdbcGeneratedKey getGeneratedKey(ResultSet rs, int r) throws SQLException {
+        if (rs != null) {
+            try {
+                JdbcGeneratedKey generatedKey = new JdbcGeneratedKey(r);
+                int columnCount = rs.getMetaData().getColumnCount();
+                if (columnCount != 0) {
+                    while (rs.next()) {
+                        Map<String, Object> map = new HashMap<>();
+                        generatedKey.getKeyList().add(map);
+                        for (int i = 0; i < columnCount; i++) {
+                            String label = rs.getMetaData().getColumnLabel(i + 1);
+                            map.put(label, rs.getObject(label));
+                        }
+                    }
+                }
+                return generatedKey;
+            } finally {
+                closeRs(rs);
+            }
+        }
+        return null;
+    }
+
+
+    public JdbcGeneratedKey executeBatchGeneratedKey(String sql, List<Object[]> objects) {
+        PreparedStatement ps = null;
+        try {
+            ps = preBatch(sql, objects, true);
+            int[] r = ps.executeBatch();
+            ps.getConnection().commit();
+            if (r.length != 0) {
+                return getGeneratedKey(ps.getGeneratedKeys(), JdbcHelper.getBatchResult(r));
+            }
+        } catch (SQLException e) {
+            LOGGER.error("JdbcUtils.executeUpdate", e);
+        } finally {
+            close(ps);
+        }
+        return null;
     }
 
 
     public <T> boolean update(T t) {
         if (t == null)
             return false;
-        String sql = cudHelper.getUpdateSql(t.getClass());
-        Object[] objects = cudHelper.getUpdateObjects(t);
+        String sql = updateHelper.getUpdateSql(t.getClass());
+        Object[] objects = updateHelper.getUpdateObjects(t);
         return executeUpdate(sql, objects) != 0 ? true : false;
     }
 
@@ -98,37 +193,12 @@ public class JdbcUtils {
             return 0;
         }
         Class<T> type = (Class<T>) list.get(0).getClass();
-        String sql = cudHelper.getUpdateSql(type);
+        String sql = updateHelper.getUpdateSql(type);
         List<Object[]> objectList = new ArrayList<>();
         for (T t : list) {
-            objectList.add(cudHelper.getUpdateObjects(t));
+            objectList.add(updateHelper.getUpdateObjects(t));
         }
         return executeBatch(sql, objectList);
-    }
-
-    public Object executeUpdateGenerateKey(String sql, Object[] objects) {
-//        GeneratedKey key = new GeneratedKey();
-        PreparedStatement ps = null;
-        try {
-            ps = pre(sql, objects, true);
-            int r = ps.executeUpdate();
-            ResultSet rs = ps.getGeneratedKeys();
-            ResultSetMetaData meta = rs.getMetaData();
-            int columnCount = meta.getColumnCount();
-            if (r != 0) {
-                if (rs.next()) {
-                    if (columnCount != 0) {
-                        return rs.getObject(1);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            LOGGER.error("JdbcUtils.executeUpdate", e);
-
-        } finally {
-            close(ps);
-        }
-        return null;
     }
 
 
@@ -172,26 +242,16 @@ public class JdbcUtils {
     public int executeBatch(String sql, List<Object[]> objectList) {
         PreparedStatement ps = null;
         try {
-            ps = preBatch(sql, objectList);
+            ps = preBatch(sql, objectList, false);
             int[] r = ps.executeBatch();
             ps.getConnection().commit();
-            return getBatchResult(r);
+            return JdbcHelper.getBatchResult(r);
         } catch (SQLException e) {
             LOGGER.error("JdbcUtils.executeBatch", e);
             return 0;
         } finally {
             close(ps);
         }
-    }
-
-    private int getBatchResult(int[] r) {
-        int cnt = 0;
-        for (int item : r) {
-            if (item != Statement.EXECUTE_FAILED) {
-                cnt++;
-            }
-        }
-        return cnt;
     }
 
     private <T> List<T> mapperList(ResultSet rs, Class<T> type) {
@@ -232,12 +292,17 @@ public class JdbcUtils {
         }
     }
 
-    private PreparedStatement preBatch(String sql, List<Object[]> objectsArray) {
+    private PreparedStatement preBatch(String sql, List<Object[]> objectsList, boolean autoGeneratedKeys) {
         try {
             Connection conn = getConnection();
             conn.setAutoCommit(false);
-            PreparedStatement ps = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            for (Object[] objects : objectsArray) {
+            PreparedStatement ps = null;
+            if (autoGeneratedKeys) {
+                ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            } else {
+                ps = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            }
+            for (Object[] objects : objectsList) {
                 for (int i = 0, size = objects.length; i < size; i++) {
                     ps.setObject(i + 1, objects[i]);
                 }

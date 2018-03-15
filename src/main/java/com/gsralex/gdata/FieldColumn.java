@@ -7,8 +7,7 @@ package com.gsralex.gdata;
 public class FieldColumn {
     private String name;
     private boolean id;
-    private boolean alias;
-    private String aliasName;
+    private String label;
     private Class type;
 
 
@@ -28,20 +27,12 @@ public class FieldColumn {
         this.id = id;
     }
 
-    public boolean isAlias() {
-        return alias;
+    public String getLabel() {
+        return label;
     }
 
-    public void setAlias(boolean alias) {
-        this.alias = alias;
-    }
-
-    public String getAliasName() {
-        return aliasName;
-    }
-
-    public void setAliasName(String aliasName) {
-        this.aliasName = aliasName;
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     public Class getType() {
