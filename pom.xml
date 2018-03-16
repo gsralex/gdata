@@ -4,7 +4,7 @@
 
     <groupId>com.gsralex</groupId>
     <artifactId>gdata</artifactId>
-    <version>1.0</version>
+    <version>1.01</version>
 
     <name>gdata</name>
     <description>jdbc,javatemplate bean insert,update and mapper.</description>

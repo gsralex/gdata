@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Type;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -79,43 +80,15 @@ public class JdbcTemplateUtils {
     }
 
     public <T> int batchInsert(List<T> list) {
-        return 0;
-    }
-
-    public <T> int batchInsert(List<T> list, boolean generatedKey) {
         if (list == null || list.size() == 0) {
             return 0;
         }
-        return 0;
-    }
-
-    public <T> int batchInsertBean(List<T> list) {
         String sql = insertHelper.getInsertSql(TypeUtils.getType(list));
         List<Object[]> argList = new ArrayList<>();
         for (T item : list) {
             argList.add(insertHelper.getInsertObjects(item));
         }
         return JdbcHelper.getBatchResult(jdbcTemplate.batchUpdate(sql, argList));
-    }
-
-    public <T> int batchInsertGeneratedKey(List<T> list) {
-        String sql = insertHelper.getInsertSql(TypeUtils.getType(list));
-        List<Object[]> argList = new ArrayList<>();
-        for (T item : list) {
-            argList.add(insertHelper.getInsertObjects(item));
-        }
-        return JdbcHelper.getBatchResult(jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
-
-            @Override
-            public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
-
-            }
-
-            @Override
-            public int getBatchSize() {
-                return 0;
-            }
-        }));
     }
 
 
@@ -131,7 +104,7 @@ public class JdbcTemplateUtils {
     public <T> int batchUpdate(List<T> list) {
         if (list == null || list.size() == 0)
             return 0;
-        Class<T> type = (Class<T>) list.get(0).getClass();
+        Class type = TypeUtils.getType(list);
         String sql = updateHelper.getUpdateSql(type);
         List<Object[]> argList = new ArrayList<>();
         for (T item : list) {
