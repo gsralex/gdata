@@ -8,14 +8,14 @@ import java.util.Map;
  * @author gsralex
  * 2018/2/18
  */
-public class ModelMapper {
+public class Mapper {
 
     private String tableName;
     private Class type;
     private Map<String, FieldColumn> mapper;
     private Map<FieldEnum, List<FieldColumn>> fieldMapper;
 
-    public ModelMapper() {
+    public Mapper() {
         mapper = new HashMap<>();
         fieldMapper = new HashMap<>();
     }

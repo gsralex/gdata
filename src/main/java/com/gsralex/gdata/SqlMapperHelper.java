@@ -16,9 +16,9 @@ public class SqlMapperHelper {
         T instance = null;
         try {
             instance = type.newInstance();
-            ModelMapper modelMapper = ModelMapperHolder.getMapperCache(type);
+            Mapper mapper = MapperHolder.getMapperCache(type);
             FieldValue fieldValue = new FieldValue(instance);
-            mapper(resultSet, modelMapper, fieldValue);
+            mapper(resultSet, mapper, fieldValue);
             return (T) fieldValue.getInstance();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -29,8 +29,8 @@ public class SqlMapperHelper {
     }
 
 
-    public void mapper(ResultSet rs, ModelMapper modelMapper, FieldValue fieldValue) {
-        for (Map.Entry<String, FieldColumn> item : modelMapper.getMapper().entrySet()) {
+    public void mapper(ResultSet rs, Mapper mapper, FieldValue fieldValue) {
+        for (Map.Entry<String, FieldColumn> item : mapper.getMapper().entrySet()) {
             setRsValue(rs, item.getValue(), fieldValue);
         }
     }

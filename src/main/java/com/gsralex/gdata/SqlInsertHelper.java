@@ -13,10 +13,10 @@ import java.util.Map;
 public class SqlInsertHelper {
 
     public <T> Object[] getInsertObjects(T t) {
-        ModelMapper modelMapper = ModelMapperHolder.getMapperCache(t.getClass());
+        Mapper mapper = MapperHolder.getMapperCache(t.getClass());
         FieldValue fieldValue = new FieldValue(t);
         List<Object> objects = new ArrayList<>();
-        for (Map.Entry<String, FieldColumn> entry : modelMapper.getMapper().entrySet()) {
+        for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
             FieldColumn column = entry.getValue();
             if (!column.isId()) {
                 Object value = fieldValue.getValue(column.getType(), entry.getKey());
@@ -29,12 +29,12 @@ public class SqlInsertHelper {
     }
 
     public <T> List<FieldColumn> getColumns(Class<T> type, FieldEnum fieldEnum) {
-        ModelMapper mapper = ModelMapperHolder.getMapperCache(type);
+        Mapper mapper = MapperHolder.getMapperCache(type);
         return mapper.getFieldMapper().get(FieldEnum.Id);
     }
 
     public <T> String getInsertSql(Class<T> type) {
-        ModelMapper mapper = ModelMapperHolder.getMapperCache(type);
+        Mapper mapper = MapperHolder.getMapperCache(type);
         String sql = String.format("insert into `%s`", mapper.getTableName());
         String insertSql = "(";
         String valueSql = " values(";

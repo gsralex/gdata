@@ -13,7 +13,7 @@ import java.util.Map;
 public class SqlUpdateHelper {
 
     public <T> String getUpdateSql(Class<T> type) {
-        ModelMapper mapper = ModelMapperHolder.getMapperCache(type);
+        Mapper mapper = MapperHolder.getMapperCache(type);
         String sql = String.format("update `%s` set ", mapper.getTableName());
         for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
             FieldColumn column = entry.getValue();
@@ -34,18 +34,18 @@ public class SqlUpdateHelper {
     }
 
     public <T> Object[] getUpdateObjects(T t) {
-        ModelMapper modelMapper = ModelMapperHolder.getMapperCache(t.getClass());
+        Mapper mapper = MapperHolder.getMapperCache(t.getClass());
         FieldValue fieldValue = new FieldValue(t);
         List<Object> objects = new ArrayList<>();
 
-        for (Map.Entry<String, FieldColumn> entry : modelMapper.getMapper().entrySet()) {
+        for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
             FieldColumn column = entry.getValue();
             if (!column.isId()) {
                 Object value = fieldValue.getValue(column.getType(),entry.getKey());
                 objects.add(value);
             }
         }
-        for (Map.Entry<String, FieldColumn> entry : modelMapper.getMapper().entrySet()) {
+        for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
             FieldColumn column = entry.getValue();
             if (column.isId()) {
                 Object value = fieldValue.getValue(column.getType(),entry.getKey());
