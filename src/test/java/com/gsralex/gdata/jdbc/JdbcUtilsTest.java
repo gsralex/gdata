@@ -85,10 +85,23 @@ public class JdbcUtilsTest {
     }
 
     @Test
+    public void get() throws Exception {
+        Foo foo1 = FooSource.getEntity();
+        Assert.assertEquals(true, jdbcUtils.insert(foo1, true));
+
+        Foo fooData = jdbcUtils.get("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
+        Integer cnt = jdbcUtils.get("select count(1) from t_foo", null, Integer.class);
+        Assert.assertNotEquals(cnt, null);
+    }
+
+
+    @Test
     public void query() throws Exception {
         Foo foo1 = FooSource.getEntity();
         Assert.assertEquals(true, jdbcUtils.insert(foo1, true));
         List<Foo> fooList = jdbcUtils.query("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
+
+
         Assert.assertEquals(fooList.size(), 1);
     }
 

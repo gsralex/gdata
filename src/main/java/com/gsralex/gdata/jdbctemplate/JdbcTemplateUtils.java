@@ -126,6 +126,14 @@ public class JdbcTemplateUtils {
         return jdbcTemplate.query(sql, args, new BeanRowMapper<>(type));
     }
 
+    public int update(String sql, Object[] args, int[] argTypes) {
+        return jdbcTemplate.update(sql, args, argTypes);
+    }
+
+    public int update(String sql, Object... args) {
+        return jdbcTemplate.update(sql, args);
+    }
+
 
     public JdbcTemplate getJdbcTemplate() {
         return jdbcTemplate;

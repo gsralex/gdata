@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -87,6 +88,9 @@ public class JdbcTemplateUtilsTest {
         Assert.assertEquals(true, templateUtils.insert(foo1, true));
         Foo foo1Data = templateUtils.get("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
         Assert.assertNotEquals(foo1Data, null);
+
+        String cnt = templateUtils.get("select count(1) from t_foo ", null, String.class);
+        Assert.assertNotEquals(cnt, null);
     }
 
     @Test
