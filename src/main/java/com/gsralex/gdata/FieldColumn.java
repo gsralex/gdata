@@ -2,7 +2,7 @@ package com.gsralex.gdata;
 
 /**
  * @author gsralex
- * 2018/2/18
+ * @version 2018/2/18
  */
 public class FieldColumn {
     private String name;

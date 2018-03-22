@@ -2,7 +2,7 @@ package com.gsralex.gdata.constant;
 
 /**
  * @author gsralex
- *         date: 2018/3/15
+ * @version 2018/3/15
  */
 public class JdbcConstants {
 

@@ -5,7 +5,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * @author gsralex
- * 2018/2/17
+ * @version 2018/2/17
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IgnoreField {

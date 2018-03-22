@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * @author gsralex
- *         date: 2018/3/13
+ * @version 2018/3/13
  */
 public class TypeUtils {
 

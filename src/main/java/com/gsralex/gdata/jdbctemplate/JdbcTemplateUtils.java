@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * @author gsralex
- *         2018/3/10
+ * @version 2018/3/10
  */
 public class JdbcTemplateUtils {
 

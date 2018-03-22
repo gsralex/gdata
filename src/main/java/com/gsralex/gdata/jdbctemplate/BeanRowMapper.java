@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 /**
  * @author gsralex
- *         2018/3/10
+ * @version 2018/3/10
  */
 public class BeanRowMapper<T> implements RowMapper<T> {
 
