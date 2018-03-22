@@ -37,6 +37,9 @@ Example
     private Integer foo4;//db field foo_4
    
     private Integer foo5;//db field foo5
+	
+	@IgnoreField
+	private Integer foo6;//not a db field
 }
  
 Foo foo=new Foo();
