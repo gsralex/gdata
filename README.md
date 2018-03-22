@@ -1,8 +1,20 @@
-# gdata
-对jdbc和jdbctemplate的浅封装
-
+gdata
+--------
+[![Maven Central](https://img.shields.io/maven-central/v/org.apache.maven/apache-maven.svg)](http://mvnrepository.com/artifact/com.gsralex/gdata)
 
   
+Maven
+--------
+ ``` java
+   <dependency>
+        <groupId>com.gsralex</groupId>
+        <artifactId>gdata</artifactId>
+        <version>1.0.3</version>
+    </dependency>
+```
+
+Example
+--------
  ``` java
  JdbcUtils jdbcUtils = new JdbcUtils(DataSourceConfg.getDataSource());
  @TbName(name = "t_foo")
@@ -38,4 +50,12 @@ Foo data=jdbcUtils.get("select * from t_foo where id=?",new Object[]{1},Foo.clas
 List<Foo> list=jdbcUtils.query("select * from t_foo",null,Foo.class);
 
 Integer cnt=jdbcUtils.get("select count(1) from t_foo",null,Integer.class);
+ ```
+
+ChangeLog
+--------
+### v1.03(2018-03-20)
+- 加入了get,getList返回Integer.class等常用类型
+
+
 
