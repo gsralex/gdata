@@ -1,7 +1,5 @@
 # gdata
 
-### jdbc,jdbctemplate bean
---------
 [![Maven Central](https://img.shields.io/maven-metadata/v/http/central.maven.org/maven2/com/gsralex/gdata/maven-metadata.xml.svg)](http://mvnrepository.com/artifact/com.gsralex/gdata)
 
   
