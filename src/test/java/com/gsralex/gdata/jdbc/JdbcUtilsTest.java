@@ -99,7 +99,7 @@ public class JdbcUtilsTest {
     public void query() throws Exception {
         Foo foo1 = FooSource.getEntity();
         Assert.assertEquals(true, jdbcUtils.insert(foo1, true));
-        List<Foo> fooList = jdbcUtils.query("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
+        List<Foo> fooList = jdbcUtils.getList("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
 
 
         Assert.assertEquals(fooList.size(), 1);
@@ -124,7 +124,7 @@ public class JdbcUtilsTest {
         Assert.assertEquals(jdbcUtils.executeBatch(sql, objList), 2);
 
         String querySql = "select * from t_foo where id in (" + foo1.getId() + "," + foo2.getId() + ")";
-        List<Foo> dataList = jdbcUtils.query(querySql, null, Foo.class);
+        List<Foo> dataList = jdbcUtils.getList(querySql, null, Foo.class);
         Assert.assertEquals(dataList.get(0).getFoo1(), foo_1);
         Assert.assertEquals(dataList.get(1).getFoo1(), foo_1);
     }
