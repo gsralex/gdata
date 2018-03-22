@@ -51,7 +51,7 @@ jdbcUtils.update(foo);
   
 Foo data=jdbcUtils.get("select * from t_foo where id=?",new Object[]{1},Foo.class);
 
-List<Foo> list=jdbcUtils.query("select * from t_foo",null,Foo.class);
+List<Foo> list=jdbcUtils.getList("select * from t_foo",null,Foo.class);
 
 Integer cnt=jdbcUtils.get("select count(1) from t_foo",null,Integer.class);
  ```
