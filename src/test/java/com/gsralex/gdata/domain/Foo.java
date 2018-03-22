@@ -2,7 +2,7 @@ package com.gsralex.gdata.domain;
 
 import com.gsralex.gdata.annotation.LabelField;
 import com.gsralex.gdata.annotation.IdField;
-import com.gsralex.gdata.annotation.TbName;
+import com.gsralex.gdata.annotation.Table;
 
 import java.util.Date;
 
@@ -10,7 +10,7 @@ import java.util.Date;
  * @author gsralex
  * 2018/3/10
  */
-@TbName(name = "t_foo")
+@Table(name = "t_foo")
 public class Foo {
 
     @IdField

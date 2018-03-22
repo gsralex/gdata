@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
  * 2018/2/18
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TbName {
+public @interface Table {
 
     String name() default "";
 }

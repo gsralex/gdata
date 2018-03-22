@@ -4,7 +4,7 @@ package com.gsralex.gdata;
 import com.gsralex.gdata.annotation.LabelField;
 import com.gsralex.gdata.annotation.IdField;
 import com.gsralex.gdata.annotation.IgnoreField;
-import com.gsralex.gdata.annotation.TbName;
+import com.gsralex.gdata.annotation.Table;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
@@ -34,7 +34,7 @@ public class MapperHolder {
     private static Mapper getMapper(Class type) {
         String className = type.getName();
         String tableName;
-        TbName tbName = (TbName) type.getAnnotation(TbName.class);
+        Table tbName = (Table) type.getAnnotation(Table.class);
         if (tbName != null) {
             tableName = tbName.name();
         } else {
