@@ -14,5 +14,5 @@ import java.lang.annotation.Target;
 public @interface IdField {
     String name() default "";
 
-    boolean autoGenerate() default true;
+    boolean generatedKey() default true;
 }

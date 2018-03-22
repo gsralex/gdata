@@ -7,6 +7,7 @@ package com.gsralex.gdata;
 public class FieldColumn {
     private String name;
     private boolean id;
+    private boolean generatedKey;
     private String label;
     private Class type;
 
@@ -25,6 +26,14 @@ public class FieldColumn {
 
     public void setId(boolean id) {
         this.id = id;
+    }
+
+    public boolean isGeneratedKey() {
+        return generatedKey;
+    }
+
+    public void setGeneratedKey(boolean generatedKey) {
+        this.generatedKey = generatedKey;
     }
 
     public String getLabel() {

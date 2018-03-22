@@ -1,5 +1,7 @@
 package com.gsralex.gdata;
 
+import com.gsralex.gdata.exception.GdataException;
+import com.gsralex.gdata.exception.GdataMessage;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -12,6 +14,14 @@ import java.util.Map;
  */
 public class SqlUpdateHelper {
 
+    public <T> boolean checkValid(Class<T> type) {
+        Mapper mapper = MapperHolder.getMapperCache(type);
+        if (mapper.getFieldMapper().get(FieldEnum.Id).size() == 0) {
+            throw new GdataException(GdataMessage.NOTID_FORUPDATE);
+        }
+        return true;
+    }
+
     public <T> String getUpdateSql(Class<T> type) {
         Mapper mapper = MapperHolder.getMapperCache(type);
         String sql = String.format("update `%s` set ", mapper.getTableName());
@@ -22,14 +32,14 @@ public class SqlUpdateHelper {
             }
         }
         sql = StringUtils.removeEnd(sql, ",");
-        sql += " where 1=1 ";
+        sql += " where ";
         for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
             FieldColumn column = entry.getValue();
             if (column.isId()) {
-                sql += String.format("and %s=?,", column.getLabel());
+                sql += String.format(" `%s`=? and", column.getLabel());
             }
         }
-        sql = StringUtils.removeEnd(sql, ",");
+        sql = StringUtils.removeEnd(sql, "and");
         return sql;
     }
 
@@ -41,14 +51,14 @@ public class SqlUpdateHelper {
         for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
             FieldColumn column = entry.getValue();
             if (!column.isId()) {
-                Object value = fieldValue.getValue(column.getType(),entry.getKey());
+                Object value = fieldValue.getValue(column.getType(), entry.getKey());
                 objects.add(value);
             }
         }
         for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
             FieldColumn column = entry.getValue();
             if (column.isId()) {
-                Object value = fieldValue.getValue(column.getType(),entry.getKey());
+                Object value = fieldValue.getValue(column.getType(), entry.getKey());
                 objects.add(value);
             }
         }

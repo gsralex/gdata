@@ -42,7 +42,11 @@ public class JdbcUtils {
             return false;
         }
         if (generatedKey) {
-            return insertGeneratedKey(t);
+            if (insertHelper.existsGenerateKey(t.getClass())) {
+                return insertGeneratedKey(t);
+            } else {
+                return insertBean(t);
+            }
         } else {
             return insertBean(t);
         }
@@ -58,8 +62,9 @@ public class JdbcUtils {
     }
 
     private <T> boolean insertGeneratedKey(T t) {
+        Class type = t.getClass();
+        String sql = insertHelper.getInsertSql(type);
         Object[] objects = insertHelper.getInsertObjects(t);
-        String sql = insertHelper.getInsertSql(t.getClass());
         JdbcGeneratedKey generatedKey = executeUpdateGenerateKey(sql, objects);
         if (generatedKey != null) {
             List<FieldColumn> columnList = insertHelper.getColumns(t.getClass(), FieldEnum.Id);
@@ -84,7 +89,12 @@ public class JdbcUtils {
         if (list == null || list.size() == 0)
             return 0;
         if (generatedKey) {
-            return batchInsertGeneratedKey(list);
+            Class type = TypeUtils.getType(list);
+            if (insertHelper.existsGenerateKey(type)) {
+                return batchInsertGeneratedKey(list);
+            } else {
+                return batchInsertBean(list);
+            }
         } else {
             return batchInsertBean(list);
         }
@@ -100,7 +110,8 @@ public class JdbcUtils {
     }
 
     private <T> int batchInsertGeneratedKey(List<T> list) {
-        String sql = insertHelper.getInsertSql(TypeUtils.getType(list));
+        Class type = TypeUtils.getType(list);
+        String sql = insertHelper.getInsertSql(type);
         List<Object[]> objectList = new ArrayList<>();
         for (T t : list) {
             objectList.add(insertHelper.getInsertObjects(t));
@@ -183,6 +194,7 @@ public class JdbcUtils {
     public <T> boolean update(T t) {
         if (t == null)
             return false;
+        updateHelper.checkValid(t.getClass());
         String sql = updateHelper.getUpdateSql(t.getClass());
         Object[] objects = updateHelper.getUpdateObjects(t);
         return executeUpdate(sql, objects) != 0 ? true : false;
@@ -193,6 +205,7 @@ public class JdbcUtils {
             return 0;
         }
         Class<T> type = (Class<T>) list.get(0).getClass();
+        updateHelper.checkValid(type);
         String sql = updateHelper.getUpdateSql(type);
         List<Object[]> objectList = new ArrayList<>();
         for (T t : list) {

@@ -43,7 +43,11 @@ public class JdbcTemplateUtils {
             return false;
         }
         if (generatedKey) {
-            return insertGeneratedKey(t);
+            if (insertHelper.existsGenerateKey(t.getClass())) {
+                return insertGeneratedKey(t);
+            } else {
+                return insertBean(t);
+            }
         } else {
             return insertBean(t);
         }
@@ -56,7 +60,8 @@ public class JdbcTemplateUtils {
     }
 
     private <T> boolean insertGeneratedKey(T t) {
-        String sql = insertHelper.getInsertSql(t.getClass());
+        Class type = t.getClass();
+        String sql = insertHelper.getInsertSql(type);
         Object[] objects = insertHelper.getInsertObjects(t);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int r = jdbcTemplate.update(conn -> {
@@ -96,7 +101,9 @@ public class JdbcTemplateUtils {
         if (t == null) {
             return false;
         }
-        String sql = updateHelper.getUpdateSql(t.getClass());
+        Class type = t.getClass();
+        updateHelper.checkValid(type);
+        String sql = updateHelper.getUpdateSql(type);
         Object[] objects = updateHelper.getUpdateObjects(t);
         return jdbcTemplate.update(sql, objects) != 0 ? true : false;
     }
@@ -105,6 +112,7 @@ public class JdbcTemplateUtils {
         if (list == null || list.size() == 0)
             return 0;
         Class type = TypeUtils.getType(list);
+        updateHelper.checkValid(type);
         String sql = updateHelper.getUpdateSql(type);
         List<Object[]> argList = new ArrayList<>();
         for (T item : list) {

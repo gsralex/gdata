@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,16 +19,25 @@ import java.util.Map;
 public class MapperHolder {
 
     private static Map<String, Mapper> cacheMapper = new HashMap<>();
+    private static Object sync = new Object();
+
 
     public static Mapper getMapperCache(Class type) {
         String className = type.getName();
-        if (cacheMapper.containsKey(className)) {
-            return cacheMapper.get(className);
+        Mapper mapper = cacheMapper.get(className);
+        if (mapper != null)
+            return mapper;
+
+        synchronized (sync) {
+            mapper = cacheMapper.get(className);
+            if (mapper != null)
+                return mapper;
+            Mapper fieldMapper = getMapper(type);
+            cacheMapper.put(className, fieldMapper);
+            return fieldMapper;
         }
-        Mapper fieldMapper = getMapper(type);
-        cacheMapper.put(className, fieldMapper);
-        return fieldMapper;
     }
+
 
     private static Mapper getMapper(Class type) {
         String className = type.getName();
@@ -44,6 +52,7 @@ public class MapperHolder {
         Mapper mapper = new Mapper();
         mapper.setType(type);
         mapper.setTableName(tableName);
+        initFieldMap(mapper);
         Field[] fields = type.getDeclaredFields();
         for (Field field : fields) {
             String filedName = field.getName();
@@ -56,6 +65,7 @@ public class MapperHolder {
             IdField idField = field.getAnnotation(IdField.class);
             if (idField != null) {
                 column.setId(true);
+                column.setGeneratedKey(idField.generatedKey());
                 column.setName(field.getName());
                 if (!StringUtils.isEmpty(idField.name())) {
                     column.setLabel(idField.name());
@@ -84,14 +94,14 @@ public class MapperHolder {
         return mapper;
     }
 
-    private static void addFieldMap(FieldEnum fieldEnum, FieldColumn column, Mapper mapper) {
-        if (mapper.getFieldMapper().containsKey(fieldEnum)) {
-            mapper.getFieldMapper().get(fieldEnum).add(column);
-        } else {
-            List<FieldColumn> list = new ArrayList<>();
-            list.add(column);
-            mapper.getFieldMapper().put(fieldEnum, list);
+    private static void initFieldMap(Mapper mapper) {
+        for (FieldEnum fieldEnum : FieldEnum.values()) {
+            mapper.getFieldMapper().put(fieldEnum, new ArrayList<>());
         }
+    }
+
+    private static void addFieldMap(FieldEnum fieldEnum, FieldColumn column, Mapper mapper) {
+        mapper.getFieldMapper().get(fieldEnum).add(column);
     }
 
 }
