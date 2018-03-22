@@ -1,7 +1,8 @@
 package com.gsralex.gdata.domain;
 
-import com.gsralex.gdata.annotation.LabelField;
+
 import com.gsralex.gdata.annotation.IdField;
+import com.gsralex.gdata.annotation.LabelField;
 import com.gsralex.gdata.annotation.Table;
 
 import java.util.Date;
