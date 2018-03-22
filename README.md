@@ -18,25 +18,25 @@ Example
 --------
  ``` java
  JdbcUtils jdbcUtils = new JdbcUtils(DataSourceConfg.getDataSource());
- @TbName(name = "t_foo")
+ @Table(name = "t_foo")
  public class Foo {
 
     @IdField
-    private long id;
+    private Long id;
 
     @LabelField(name = "foo_1")
     private String foo1;//db field foo_1
 
     @LabelField(name = "foo_2")
-    private double foo2;//db field foo_2
+    private Double foo2;//db field foo_2
 
     @LabelField(name = "foo_3")
     private Date foo3;//db field foo_3
 
     @LabelField(name = "foo_4")
-    private int foo4;//db field foo_4
+    private Integer foo4;//db field foo_4
    
-    private int foo5;//db field foo5
+    private Integer foo5;//db field foo5
 }
  
 Foo foo=new Foo();
