@@ -6,5 +6,5 @@ package com.gsralex.gdata.exception;
  */
 public class GdataMessage {
 
-    public static final String NOTID_FORUPDATE = "实体中不包含Id注解，无法直接使用update model";
+    public static final String NOTID_FORUPDATE = "The entity has no ID annotations, and the UPDATE statement cannot be used";
 }
