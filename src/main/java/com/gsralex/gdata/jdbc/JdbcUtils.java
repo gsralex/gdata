@@ -229,14 +229,14 @@ public class JdbcUtils {
     }
 
     public <T> T get(String sql, Object[] objects, Class<T> type) {
-        List<T> list = query(sql, objects, type);
+        List<T> list = getList(sql, objects, type);
         if (list != null && list.size() != 0) {
             return list.get(0);
         }
         return null;
     }
 
-    public <T> List<T> query(String sql, Object[] objects, Class<T> type) {
+    public <T> List<T> getList(String sql, Object[] objects, Class<T> type) {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
