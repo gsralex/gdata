@@ -60,6 +60,7 @@ public class JdbcUtilsTest {
         Foo data = jdbcUtils.get("select * from t_foo where id=?", new Object[]{foo.getId()}, Foo.class);
         Assert.assertEquals(data.getFoo1(), foo.getFoo1());
         Assert.assertEquals(data.getFoo4(), foo.getFoo4());
+        Assert.assertNotEquals(data.getFooImg(),null);
     }
 
     @Test

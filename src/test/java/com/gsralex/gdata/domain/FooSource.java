@@ -16,6 +16,7 @@ public class FooSource {
         foo1.setFoo2(123.13);
         foo1.setFoo3(new Date());
         foo1.setFoo4(1);
+        foo1.setFooImg("123123");
         return foo1;
     }
 

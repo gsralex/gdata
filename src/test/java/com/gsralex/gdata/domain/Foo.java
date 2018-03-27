@@ -29,6 +29,9 @@ public class Foo {
     @LabelField(name = "foo_4")
     private int foo4;
 
+    @LabelField(name = "foo_img")
+    private String fooimg;
+
     public long getId() {
         return id;
     }
@@ -67,5 +70,13 @@ public class Foo {
 
     public void setFoo4(int foo4) {
         this.foo4 = foo4;
+    }
+
+    public String getFooImg() {
+        return fooimg;
+    }
+
+    public void setFooImg(String fooimg) {
+        this.fooimg = fooimg;
     }
 }
