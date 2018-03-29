@@ -1,7 +1,8 @@
-package com.gsralex.gdata;
+package com.gsralex.gdata.sqlhelper;
 
-import com.gsralex.gdata.exception.GdataException;
-import com.gsralex.gdata.exception.GdataMessage;
+import com.gsralex.gdata.exception.DataException;
+import com.gsralex.gdata.exception.ExceptionMessage;
+import com.gsralex.gdata.mapper.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -12,17 +13,19 @@ import java.util.Map;
  * @author gsralex
  * @version 2018/3/15
  */
-public class SqlUpdateHelper {
+public class SqlUpdateHelper implements SqlHelper {
 
-    public <T> boolean checkValid(Class<T> type) {
+    @Override
+    public boolean checkValid(Class type) {
         Mapper mapper = MapperHolder.getMapperCache(type);
         if (mapper.getFieldMapper().get(FieldEnum.Id).size() == 0) {
-            throw new GdataException(GdataMessage.NOTID_FORUPDATE);
+            throw new DataException(ExceptionMessage.NOTID_FORUPDATE);
         }
         return true;
     }
 
-    public <T> String getUpdateSql(Class<T> type) {
+    @Override
+    public <T> String getSql(Class<T> type) {
         Mapper mapper = MapperHolder.getMapperCache(type);
         String sql = String.format("update `%s` set ", mapper.getTableName());
         for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
@@ -43,7 +46,8 @@ public class SqlUpdateHelper {
         return sql;
     }
 
-    public <T> Object[] getUpdateObjects(T t) {
+    @Override
+    public <T> Object[] getObjects(T t) {
         Mapper mapper = MapperHolder.getMapperCache(t.getClass());
         FieldValue fieldValue = new FieldValue(t);
         List<Object> objects = new ArrayList<>();

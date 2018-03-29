@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  * @author gsralex
- * 2018/3/10
+ *         2018/3/10
  */
 @Table(name = "t_foo")
 public class Foo {
@@ -31,6 +31,10 @@ public class Foo {
 
     @LabelField(name = "foo_img")
     private String fooimg;
+
+    @LabelField(name = "foo_5")
+    private boolean foo5;
+
 
     public long getId() {
         return id;
@@ -78,5 +82,13 @@ public class Foo {
 
     public void setFooImg(String fooimg) {
         this.fooimg = fooimg;
+    }
+
+    public boolean isFoo5() {
+        return foo5;
+    }
+
+    public void setFoo5(boolean foo5) {
+        this.foo5 = foo5;
     }
 }

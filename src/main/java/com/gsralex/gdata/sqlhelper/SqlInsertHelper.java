@@ -1,7 +1,6 @@
-package com.gsralex.gdata;
+package com.gsralex.gdata.sqlhelper;
 
-import com.gsralex.gdata.exception.GdataException;
-import com.gsralex.gdata.exception.GdataMessage;
+import com.gsralex.gdata.mapper.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -12,8 +11,7 @@ import java.util.Map;
  * @author gsralex
  * @version 2018/3/15
  */
-public class SqlInsertHelper {
-
+public class SqlInsertHelper implements SqlHelper {
 
     public <T> boolean existsGenerateKey(Class<T> type) {
         Mapper mapper = MapperHolder.getMapperCache(type);
@@ -30,28 +28,19 @@ public class SqlInsertHelper {
         return true;
     }
 
-    public <T> Object[] getInsertObjects(T t) {
-        Mapper mapper = MapperHolder.getMapperCache(t.getClass());
-        FieldValue fieldValue = new FieldValue(t);
-        List<Object> objects = new ArrayList<>();
-        for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
-            FieldColumn column = entry.getValue();
-            if (!(column.isId() && column.isGeneratedKey())) {
-                Object value = fieldValue.getValue(column.getType(), entry.getKey());
-                objects.add(value);
-            }
-        }
-        Object[] objArray = new Object[objects.size()];
-        objects.toArray(objArray);
-        return objArray;
-    }
-
-    public <T> List<FieldColumn> getColumns(Class<T> type, FieldEnum fieldEnum) {
+    public <T> List<FieldColumn> getIdColumns(Class<T> type) {
         Mapper mapper = MapperHolder.getMapperCache(type);
         return mapper.getFieldMapper().get(FieldEnum.Id);
+
     }
 
-    public <T> String getInsertSql(Class<T> type) {
+    @Override
+    public <T> boolean checkValid(Class<T> type) {
+        return true;
+    }
+
+    @Override
+    public <T> String getSql(Class<T> type) {
         Mapper mapper = MapperHolder.getMapperCache(type);
         String sql = String.format("insert into `%s`", mapper.getTableName());
         String insertSql = "(";
@@ -68,5 +57,22 @@ public class SqlInsertHelper {
         valueSql = StringUtils.removeEnd(valueSql, ",");
         valueSql += ")";
         return sql + insertSql + valueSql;
+    }
+
+    @Override
+    public <T> Object[] getObjects(T t) {
+        Mapper mapper = MapperHolder.getMapperCache(t.getClass());
+        FieldValue fieldValue = new FieldValue(t);
+        List<Object> objects = new ArrayList<>();
+        for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
+            FieldColumn column = entry.getValue();
+            if (!(column.isId() && column.isGeneratedKey())) {
+                Object value = fieldValue.getValue(column.getType(), entry.getKey());
+                objects.add(value);
+            }
+        }
+        Object[] objArray = new Object[objects.size()];
+        objects.toArray(objArray);
+        return objArray;
     }
 }

@@ -3,6 +3,7 @@ package com.gsralex.gdata.jdbc;
 import com.gsralex.gdata.DataSourceConfg;
 import com.gsralex.gdata.domain.Foo;
 import com.gsralex.gdata.domain.FooSource;
+import com.gsralex.gdata.result.MemSet;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +61,7 @@ public class JdbcUtilsTest {
         Foo data = jdbcUtils.get("select * from t_foo where id=?", new Object[]{foo.getId()}, Foo.class);
         Assert.assertEquals(data.getFoo1(), foo.getFoo1());
         Assert.assertEquals(data.getFoo4(), foo.getFoo4());
-        Assert.assertNotEquals(data.getFooImg(),null);
+        Assert.assertNotEquals(data.getFooImg(), null);
     }
 
     @Test
@@ -128,6 +129,40 @@ public class JdbcUtilsTest {
         List<Foo> dataList = jdbcUtils.getList(querySql, null, Foo.class);
         Assert.assertEquals(dataList.get(0).getFoo1(), foo_1);
         Assert.assertEquals(dataList.get(1).getFoo1(), foo_1);
+    }
+
+    @Test
+    public void delete() throws Exception {
+        Foo foo = FooSource.getEntity();
+        jdbcUtils.insert(foo, true);
+        jdbcUtils.delete(foo);
+        Foo data = jdbcUtils.get("select * from t_foo where id=?", new Object[]{foo.getId()}, Foo.class);
+        Assert.assertEquals(data, null);
+    }
+
+    @Test
+    public void batchDelete() throws Exception {
+        Foo foo1 = FooSource.getEntity();
+        Foo foo2 = FooSource.getEntity();
+        List<Foo> list = new ArrayList<>();
+        list.add(foo1);
+        list.add(foo2);
+        jdbcUtils.batchInsert(list, true);
+        jdbcUtils.batchDelete(list);
+        int size = jdbcUtils.getList("select * from t_foo where id in (" + foo1.getId() + "," + foo2.getId() + ")", null, Foo.class).size();
+        Assert.assertEquals(size, 0);
+    }
+
+    @Test
+    public void queryForMemSet() throws Exception {
+        Foo foo = FooSource.getEntity();
+        jdbcUtils.insert(foo, true);
+        MemSet meset = jdbcUtils.queryForMemSet("select * from t_foo where id=? ", new Object[]{foo.getId()});
+        Assert.assertNotEquals(meset.getRows().size(), 0);
+        Assert.assertNotEquals(meset.get(0).getInt("id"), null);
+        Assert.assertNotEquals(meset.get(0).getString("foo_1"), null);
+        Assert.assertNotEquals(meset.get(0).getDate("foo_3"), null);
+        Assert.assertNotEquals(meset.get(0).getBoolean("foo_5"), null);
     }
 
 }

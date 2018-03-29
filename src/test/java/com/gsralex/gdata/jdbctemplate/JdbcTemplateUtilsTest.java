@@ -3,6 +3,7 @@ package com.gsralex.gdata.jdbctemplate;
 import com.gsralex.gdata.DataSourceConfg;
 import com.gsralex.gdata.domain.Foo;
 import com.gsralex.gdata.domain.FooSource;
+import com.gsralex.gdata.result.MemSet;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -104,6 +105,42 @@ public class JdbcTemplateUtilsTest {
     @Test
     public void getJdbcTemplate() throws Exception {
 
+    }
+
+
+    @Test
+    public void delete() throws Exception {
+        Foo foo = FooSource.getEntity();
+        templateUtils.insert(foo, true);
+        templateUtils.delete(foo);
+        Foo data = templateUtils.get("select * from t_foo where id=?", new Object[]{foo.getId()}, Foo.class);
+        Assert.assertEquals(data, null);
+    }
+
+    @Test
+    public void batchDelete() throws Exception {
+        Foo foo1 = FooSource.getEntity();
+        Foo foo2 = FooSource.getEntity();
+        List<Foo> list = new ArrayList<>();
+        list.add(foo1);
+        list.add(foo2);
+        templateUtils.insert(foo1, true);
+        templateUtils.insert(foo2, true);
+        templateUtils.batchDelete(list);
+        int size = templateUtils.getList("select * from t_foo where id in (" + foo1.getId() + "," + foo2.getId() + ")", null, Foo.class).size();
+        Assert.assertEquals(size, 0);
+    }
+
+    @Test
+    public void queryForMemSet() throws Exception {
+        Foo foo = FooSource.getEntity();
+        templateUtils.insert(foo,true);
+        MemSet meset = templateUtils.queryForMemSet("select * from t_foo where id=? ", new Object[]{foo.getId()});
+        Assert.assertNotEquals(meset.getRows().size(), 0);
+        Assert.assertNotEquals(meset.get(0).getInt("id"), null);
+        Assert.assertNotEquals(meset.get(0).getString("foo_1"), null);
+        Assert.assertNotEquals(meset.get(0).getDate("foo_3"), null);
+        Assert.assertNotEquals(meset.get(0).getBoolean("foo_5"),null);
     }
 
 }

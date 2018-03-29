@@ -1,19 +1,26 @@
 package com.gsralex.gdata.jdbctemplate;
 
-import com.gsralex.gdata.*;
 import com.gsralex.gdata.constant.JdbcConstants;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import com.gsralex.gdata.mapper.FieldColumn;
+import com.gsralex.gdata.mapper.FieldValue;
+import com.gsralex.gdata.sqlhelper.*;
+import com.gsralex.gdata.result.MemRow;
+import com.gsralex.gdata.result.MemSet;
+import com.gsralex.gdata.result.MemRowImpl;
+import com.gsralex.gdata.result.MemSetImpl;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
 import javax.sql.DataSource;
-import java.lang.reflect.Type;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author gsralex
@@ -25,12 +32,14 @@ public class JdbcTemplateUtils {
     private JdbcTemplate jdbcTemplate;
     private SqlInsertHelper insertHelper;
     private SqlUpdateHelper updateHelper;
+    private SqlDeleteHelper deleteHelper;
 
 
     public JdbcTemplateUtils(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.insertHelper = new SqlInsertHelper();
         this.updateHelper = new SqlUpdateHelper();
+        this.deleteHelper = new SqlDeleteHelper();
     }
 
 
@@ -54,15 +63,16 @@ public class JdbcTemplateUtils {
     }
 
     private <T> boolean insertBean(T t) {
-        String sql = insertHelper.getInsertSql(t.getClass());
-        Object[] objects = insertHelper.getInsertObjects(t);
+        Class type = t.getClass();
+        String sql = insertHelper.getSql(t.getClass());
+        Object[] objects = insertHelper.getObjects(t);
         return jdbcTemplate.update(sql, objects) != 0 ? true : false;
     }
 
     private <T> boolean insertGeneratedKey(T t) {
         Class type = t.getClass();
-        String sql = insertHelper.getInsertSql(type);
-        Object[] objects = insertHelper.getInsertObjects(t);
+        String sql = insertHelper.getSql(type);
+        Object[] objects = insertHelper.getObjects(t);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int r = jdbcTemplate.update(conn -> {
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -73,7 +83,7 @@ public class JdbcTemplateUtils {
         }, keyHolder);
 
 
-        List<FieldColumn> columnList = insertHelper.getColumns(t.getClass(), FieldEnum.Id);
+        List<FieldColumn> columnList = insertHelper.getIdColumns(type);
         if (columnList.size() != 0) {
             Object key = keyHolder.getKeyList().get(0).get(JdbcConstants.GENERATED_KEY);
             FieldValue fieldValue = new FieldValue(t);
@@ -88,10 +98,11 @@ public class JdbcTemplateUtils {
         if (list == null || list.size() == 0) {
             return 0;
         }
-        String sql = insertHelper.getInsertSql(TypeUtils.getType(list));
+        Class type = TypeUtils.getType(list);
+        String sql = insertHelper.getSql(type);
         List<Object[]> argList = new ArrayList<>();
         for (T item : list) {
-            argList.add(insertHelper.getInsertObjects(item));
+            argList.add(insertHelper.getObjects(item));
         }
         return JdbcHelper.getBatchResult(jdbcTemplate.batchUpdate(sql, argList));
     }
@@ -102,9 +113,11 @@ public class JdbcTemplateUtils {
             return false;
         }
         Class type = t.getClass();
-        updateHelper.checkValid(type);
-        String sql = updateHelper.getUpdateSql(type);
-        Object[] objects = updateHelper.getUpdateObjects(t);
+        if (!updateHelper.checkValid(type)) {
+            return false;
+        }
+        String sql = updateHelper.getSql(type);
+        Object[] objects = updateHelper.getObjects(t);
         return jdbcTemplate.update(sql, objects) != 0 ? true : false;
     }
 
@@ -112,11 +125,13 @@ public class JdbcTemplateUtils {
         if (list == null || list.size() == 0)
             return 0;
         Class type = TypeUtils.getType(list);
-        updateHelper.checkValid(type);
-        String sql = updateHelper.getUpdateSql(type);
+        if (!updateHelper.checkValid(type)) {
+            return 0;
+        }
+        String sql = updateHelper.getSql(type);
         List<Object[]> argList = new ArrayList<>();
         for (T item : list) {
-            argList.add(updateHelper.getUpdateObjects(item));
+            argList.add(updateHelper.getObjects(item));
         }
         return JdbcHelper.getBatchResult(jdbcTemplate.batchUpdate(sql, argList));
     }
@@ -134,12 +149,64 @@ public class JdbcTemplateUtils {
         return jdbcTemplate.query(sql, args, new BeanRowMapper<>(type));
     }
 
+
+    public MemSet queryForMemSet(String sql, Object... args) {
+        SqlRowSet set = jdbcTemplate.queryForRowSet(sql, args);
+        SqlRowSetMetaData rowSetMetaData = set.getMetaData();
+        String[] labels = rowSetMetaData.getColumnNames();
+
+        List<MemRow> itemList = new ArrayList<>();
+        while (set.next()) {
+            Map<String, Object> map = new HashMap<>();
+            for (String label : labels) {
+                map.put(label, set.getObject(label));
+            }
+            itemList.add(new MemRowImpl(labels, map));
+        }
+        return new MemSetImpl(itemList);
+    }
+
+    public List<Map<String, Object>> queryForList(String sql, Object... args) {
+        return jdbcTemplate.queryForList(sql, args);
+    }
+
     public int update(String sql, Object[] args, int[] argTypes) {
         return jdbcTemplate.update(sql, args, argTypes);
     }
 
     public int update(String sql, Object... args) {
         return jdbcTemplate.update(sql, args);
+    }
+
+
+    public <T> boolean delete(T t) {
+        if (t == null) {
+            return false;
+        }
+        Class type = t.getClass();
+        if (!deleteHelper.checkValid(type)) {
+            return false;
+        }
+        String sql = deleteHelper.getSql(type);
+        Object[] objects = deleteHelper.getObjects(t);
+        return jdbcTemplate.update(sql, objects) != 0 ? true : false;
+    }
+
+    public <T> int batchDelete(List<T> list) {
+        if (list == null || list.size() == 0) {
+            return 0;
+        }
+        Class type = TypeUtils.getType(list);
+        if (!deleteHelper.checkValid(type)) {
+            return 0;
+        }
+        String sql = deleteHelper.getSql(type);
+        List<Object[]> argList = new ArrayList<>();
+        for (T t : list) {
+            Object[] objects = deleteHelper.getObjects(t);
+            argList.add(objects);
+        }
+        return JdbcHelper.getBatchResult(jdbcTemplate.batchUpdate(sql, argList));
     }
 
 

@@ -1,4 +1,4 @@
-package com.gsralex.gdata;
+package com.gsralex.gdata.mapper;
 
 
 import com.gsralex.gdata.annotation.LabelField;

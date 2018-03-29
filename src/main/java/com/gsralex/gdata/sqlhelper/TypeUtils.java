@@ -1,4 +1,4 @@
-package com.gsralex.gdata;
+package com.gsralex.gdata.sqlhelper;
 
 import java.util.List;
 

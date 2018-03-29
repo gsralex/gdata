@@ -1,4 +1,7 @@
-package com.gsralex.gdata;
+package com.gsralex.gdata.mapper;
+
+
+import com.gsralex.gdata.exception.DataException;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -45,26 +48,28 @@ public class FieldValue {
     public <T> T getValue(Class<T> fieldType, String fieldName) {
         try {
             String typeName = fieldType.getTypeName();
-            Method method = null;
+            Method method;
             switch (typeName) {
                 case "boolean": {
-                    try {
-                        method = this.getMethod(getIsMethodName(fieldName), null);
-                    } catch (NoSuchMethodException e) {
-                        try {
-                            method = this.getMethod(getGetMethodName(fieldName), null);
-                        } catch (NoSuchMethodException e1) {
+                    method = this.getMethod(getIsMethodName(fieldName), null);
+                    if (method == null) {
+                        method = this.getMethod(getGetMethodName(fieldName), null);
+                        if (method == null) {
+                            throw new NoSuchMethodException("getMethod:" + this.type.getName() + "." + fieldName);
                         }
                     }
                     break;
                 }
                 default: {
                     method = this.getMethod(getGetMethodName(fieldName), null);
+                    if (method == null) {
+                        throw new NoSuchMethodException("getMethod:" + this.type.getName() + "." + fieldName);
+                    }
                 }
             }
             return (T) method.invoke(instance);
         } catch (Throwable e) {
-            return null;
+            throw new DataException("getValue", e);
         }
     }
 
@@ -73,16 +78,19 @@ public class FieldValue {
         try {
             String setMethodName = getSetMethodName(fieldName);
             Method method = this.getMethod(setMethodName, fieldType);
+            if (method == null) {
+                throw new NoSuchMethodException("setMethod:" + this.type.getName() + "." + fieldName);
+            }
             method.invoke(instance, value);
         } catch (Throwable e) {
-            return;
+            throw new DataException("setValue", e);
         }
     }
 
-    private Method getMethod(String methodName, Class fieldType) throws NoSuchMethodException {
+    private Method getMethod(String methodName, Class fieldType) {
         String name = methodName.toLowerCase();
         List<Method> methodList = this.methodMap.get(name);
-        if (methodList.size() != 0) {
+        if (methodList != null && methodList.size() != 0) {
             for (Method method : methodList) {
                 Class[] types = method.getParameterTypes();
                 if (fieldType != null) {
@@ -96,7 +104,7 @@ public class FieldValue {
                 }
             }
         }
-        throw new NoSuchMethodException();
+        return null;
     }
 
 

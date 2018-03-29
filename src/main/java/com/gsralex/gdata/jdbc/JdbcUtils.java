@@ -1,8 +1,15 @@
 package com.gsralex.gdata.jdbc;
 
 
-import com.gsralex.gdata.*;
 import com.gsralex.gdata.constant.JdbcConstants;
+import com.gsralex.gdata.mapper.FieldColumn;
+import com.gsralex.gdata.mapper.FieldValue;
+import com.gsralex.gdata.mapper.MapperHelper;
+import com.gsralex.gdata.sqlhelper.*;
+import com.gsralex.gdata.result.MemRow;
+import com.gsralex.gdata.result.MemSet;
+import com.gsralex.gdata.result.MemRowImpl;
+import com.gsralex.gdata.result.MemSetImpl;
 import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
@@ -23,14 +30,16 @@ public class JdbcUtils {
     private DataSource dataSource;
     private SqlInsertHelper insertHelper;
     private SqlUpdateHelper updateHelper;
-    private SqlMapperHelper rHelper;
+    private MapperHelper mapperHelper;
+    private SqlDeleteHelper deleteHelper;
 
 
     public JdbcUtils(DataSource dataSource) {
         this.dataSource = dataSource;
         this.insertHelper = new SqlInsertHelper();
         this.updateHelper = new SqlUpdateHelper();
-        this.rHelper = new SqlMapperHelper();
+        this.mapperHelper = new MapperHelper();
+        this.deleteHelper = new SqlDeleteHelper();
     }
 
     public <T> boolean insert(T t) {
@@ -56,18 +65,18 @@ public class JdbcUtils {
         if (t == null) {
             return false;
         }
-        Object[] objects = insertHelper.getInsertObjects(t);
-        String sql = insertHelper.getInsertSql(t.getClass());
+        Object[] objects = insertHelper.getObjects(t);
+        String sql = insertHelper.getSql(t.getClass());
         return executeUpdate(sql, objects) != 0 ? true : false;
     }
 
     private <T> boolean insertGeneratedKey(T t) {
         Class type = t.getClass();
-        String sql = insertHelper.getInsertSql(type);
-        Object[] objects = insertHelper.getInsertObjects(t);
+        String sql = insertHelper.getSql(type);
+        Object[] objects = insertHelper.getObjects(t);
         JdbcGeneratedKey generatedKey = executeUpdateGenerateKey(sql, objects);
         if (generatedKey != null) {
-            List<FieldColumn> columnList = insertHelper.getColumns(t.getClass(), FieldEnum.Id);
+            List<FieldColumn> columnList = insertHelper.getIdColumns(type);
             if (columnList.size() != 0) {
                 FieldValue fieldValue = new FieldValue(t);
                 Object key = generatedKey.getKeyList().get(0).get(JdbcConstants.GENERATED_KEY);
@@ -101,27 +110,27 @@ public class JdbcUtils {
     }
 
     private <T> int batchInsertBean(List<T> list) {
-        String sql = insertHelper.getInsertSql(TypeUtils.getType(list));
+        String sql = insertHelper.getSql(TypeUtils.getType(list));
         List<Object[]> objectList = new ArrayList<>();
         for (T t : list) {
-            objectList.add(insertHelper.getInsertObjects(t));
+            objectList.add(insertHelper.getObjects(t));
         }
         return executeBatch(sql, objectList);
     }
 
     private <T> int batchInsertGeneratedKey(List<T> list) {
         Class type = TypeUtils.getType(list);
-        String sql = insertHelper.getInsertSql(type);
+        String sql = insertHelper.getSql(type);
         List<Object[]> objectList = new ArrayList<>();
         for (T t : list) {
-            objectList.add(insertHelper.getInsertObjects(t));
+            objectList.add(insertHelper.getObjects(t));
         }
         JdbcGeneratedKey generatedKey = executeBatchGeneratedKey(sql, objectList);
         if (generatedKey != null) {
             int i = 0;
             for (T t : list) {
                 FieldValue fieldValue = new FieldValue(t);
-                List<FieldColumn> columnList = insertHelper.getColumns(t.getClass(), FieldEnum.Id);
+                List<FieldColumn> columnList = insertHelper.getIdColumns(type);
                 for (FieldColumn column : columnList) {
                     Object value = generatedKey.get(i++).get(JdbcConstants.GENERATED_KEY);
                     fieldValue.setValue(column.getType(), column.getName(), value);
@@ -194,9 +203,12 @@ public class JdbcUtils {
     public <T> boolean update(T t) {
         if (t == null)
             return false;
-        updateHelper.checkValid(t.getClass());
-        String sql = updateHelper.getUpdateSql(t.getClass());
-        Object[] objects = updateHelper.getUpdateObjects(t);
+        Class type = t.getClass();
+        if (!updateHelper.checkValid(type)) {
+            return false;
+        }
+        String sql = updateHelper.getSql(type);
+        Object[] objects = updateHelper.getObjects(t);
         return executeUpdate(sql, objects) != 0 ? true : false;
     }
 
@@ -205,11 +217,13 @@ public class JdbcUtils {
             return 0;
         }
         Class<T> type = (Class<T>) list.get(0).getClass();
-        updateHelper.checkValid(type);
-        String sql = updateHelper.getUpdateSql(type);
+        if (!updateHelper.checkValid(type)) {
+            return 0;
+        }
+        String sql = updateHelper.getSql(type);
         List<Object[]> objectList = new ArrayList<>();
         for (T t : list) {
-            objectList.add(updateHelper.getUpdateObjects(t));
+            objectList.add(updateHelper.getObjects(t));
         }
         return executeBatch(sql, objectList);
     }
@@ -244,12 +258,77 @@ public class JdbcUtils {
             rs = ps.executeQuery();
             return mapperList(rs, type);
         } catch (SQLException e) {
-            LOGGER.error("JdbcUtils.query", e);
+            LOGGER.error("JdbcUtils.getList", e);
             return null;
         } finally {
             closeRs(rs);
             close(ps);
         }
+    }
+
+    public MemSet queryForMemSet(String sql, Object... objects) {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        List<MemRow> itemList = new ArrayList<>();
+        try {
+            ps = pre(sql, objects);
+            rs = ps.executeQuery();
+            String[] labels = JdbcHelper.getColumnLabels(rs.getMetaData());
+            while (rs.next()) {
+                Map<String, Object> map = new HashMap<>();
+                for (String label : labels) {
+                    map.put(label, rs.getObject(label));
+                }
+                MemRow memRow = new MemRowImpl(labels, map);
+                itemList.add(memRow);
+            }
+        } catch (SQLException e) {
+            LOGGER.error("JdbcUtils.queryForList", e);
+        } finally {
+            closeRs(rs);
+            close(ps);
+        }
+        return new MemSetImpl(itemList);
+    }
+
+
+    public List<Map<String, Object>> queryForList(String sql, Object... objects) {
+        MemSet memSet = queryForMemSet(sql, objects);
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        for (MemRow memRow : memSet.getRows()) {
+            mapList.add(memRow.getMap());
+        }
+        return mapList;
+    }
+
+    public <T> boolean delete(T t) {
+        if (t == null) {
+            return false;
+        }
+        Class type = t.getClass();
+        if (!deleteHelper.checkValid(type)) {
+            return false;
+        }
+        String sql = deleteHelper.getSql(type);
+        Object[] objects = deleteHelper.getObjects(t);
+        return executeUpdate(sql, objects) != 0 ? true : false;
+    }
+
+    public <T> int batchDelete(List<T> list) {
+        if (list == null || list.size() == 0) {
+            return 0;
+        }
+        Class type = TypeUtils.getType(list);
+        if (!deleteHelper.checkValid(type)) {
+            return 0;
+        }
+        String sql = deleteHelper.getSql(type);
+        List<Object[]> argList = new ArrayList<>();
+        for (T t : list) {
+            Object[] objects = deleteHelper.getObjects(t);
+            argList.add(objects);
+        }
+        return executeBatch(sql, argList);
     }
 
     public int executeBatch(String sql, List<Object[]> objectList) {
@@ -271,7 +350,7 @@ public class JdbcUtils {
         List<T> list = new ArrayList<>();
         try {
             while (rs.next()) {
-                list.add(rHelper.mapperEntity(rs, type));
+                list.add(mapperHelper.mapperEntity(rs, type));
             }
         } catch (SQLException e) {
             e.printStackTrace();

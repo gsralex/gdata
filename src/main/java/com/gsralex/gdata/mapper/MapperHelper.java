@@ -1,4 +1,4 @@
-package com.gsralex.gdata;
+package com.gsralex.gdata.mapper;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,7 +12,7 @@ import java.util.Map;
  * @author gsralex
  * @version 2018/3/10
  */
-public class SqlMapperHelper {
+public class MapperHelper {
 
 
     public <T> T mapperEntity(ResultSet resultSet, Class<T> type) {
