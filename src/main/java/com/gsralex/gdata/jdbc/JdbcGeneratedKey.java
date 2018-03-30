@@ -1,33 +1,31 @@
 package com.gsralex.gdata.jdbc;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.gsralex.gdata.result.DataSet;
 
 /**
  * @author gsralex
- * @version 2018/3/15
+ * @version 2018/3/29
  */
 public class JdbcGeneratedKey {
 
-    private List<Map<String, Object>> keyList;
-    private int r;
+    private int result;
+    private DataSet dataSet;
 
-    public JdbcGeneratedKey(int r) {
-        this.r = r;
-        keyList = new ArrayList<>();
+    public JdbcGeneratedKey(int result) {
+        this.result = result;
     }
 
-    public int getR() {
-        return r;
+    public JdbcGeneratedKey(int result, DataSet dataSet) {
+        this.result = result;
+        this.dataSet = dataSet;
     }
 
-    public List<Map<String, Object>> getKeyList() {
-        return keyList;
+
+    public int getResult() {
+        return result;
     }
 
-    public Map<String, Object> get(int row) {
-        return keyList.get(row);
+    public DataSet getDataSet() {
+        return dataSet;
     }
-
 }

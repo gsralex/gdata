@@ -6,9 +6,9 @@ import java.util.List;
  * @author gsralex
  * @version 2018/3/28
  */
-public interface MemSet {
+public interface DataSet {
 
-    MemRow get(int row);
+    DataRow get(int row);
 
-    List<MemRow> getRows();
+    List<DataRow> getRows();
 }

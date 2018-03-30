@@ -3,7 +3,7 @@ package com.gsralex.gdata.jdbc;
 import com.gsralex.gdata.DataSourceConfg;
 import com.gsralex.gdata.domain.Foo;
 import com.gsralex.gdata.domain.FooSource;
-import com.gsralex.gdata.result.MemSet;
+import com.gsralex.gdata.result.DataSet;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -154,10 +154,10 @@ public class JdbcUtilsTest {
     }
 
     @Test
-    public void queryForMemSet() throws Exception {
+    public void queryForDataSet() throws Exception {
         Foo foo = FooSource.getEntity();
         jdbcUtils.insert(foo, true);
-        MemSet meset = jdbcUtils.queryForMemSet("select * from t_foo where id=? ", new Object[]{foo.getId()});
+        DataSet meset = jdbcUtils.queryForDataSet("select * from t_foo where id=? ", new Object[]{foo.getId()});
         Assert.assertNotEquals(meset.getRows().size(), 0);
         Assert.assertNotEquals(meset.get(0).getInt("id"), null);
         Assert.assertNotEquals(meset.get(0).getString("foo_1"), null);

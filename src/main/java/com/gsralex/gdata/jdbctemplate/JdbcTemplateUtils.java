@@ -1,13 +1,10 @@
 package com.gsralex.gdata.jdbctemplate;
 
-import com.gsralex.gdata.constant.JdbcConstants;
-import com.gsralex.gdata.mapper.FieldColumn;
-import com.gsralex.gdata.mapper.FieldValue;
 import com.gsralex.gdata.sqlhelper.*;
-import com.gsralex.gdata.result.MemRow;
-import com.gsralex.gdata.result.MemSet;
-import com.gsralex.gdata.result.MemRowImpl;
-import com.gsralex.gdata.result.MemSetImpl;
+import com.gsralex.gdata.result.DataRow;
+import com.gsralex.gdata.result.DataSet;
+import com.gsralex.gdata.result.DataRowImpl;
+import com.gsralex.gdata.result.DataSetImpl;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -81,20 +78,11 @@ public class JdbcTemplateUtils {
             }
             return ps;
         }, keyHolder);
-
-
-        List<FieldColumn> columnList = insertHelper.getIdColumns(type);
-        if (columnList.size() != 0) {
-            Object key = keyHolder.getKeyList().get(0).get(JdbcConstants.GENERATED_KEY);
-            FieldValue fieldValue = new FieldValue(t);
-            for (FieldColumn column : columnList) {
-                fieldValue.setValue(column.getType(), column.getName(), key);
-            }
-        }
+        insertHelper.setIdValue(keyHolder.getKeyList().get(0).get("GENERATED_KEY"), t);
         return r != 0 ? true : false;
     }
 
-    public <T> int batchInsert(List<T> list) {
+    public  <T> int batchInsert(List<T> list) {
         if (list == null || list.size() == 0) {
             return 0;
         }
@@ -150,20 +138,20 @@ public class JdbcTemplateUtils {
     }
 
 
-    public MemSet queryForMemSet(String sql, Object... args) {
+    public DataSet queryForDataSet(String sql, Object... args) {
         SqlRowSet set = jdbcTemplate.queryForRowSet(sql, args);
         SqlRowSetMetaData rowSetMetaData = set.getMetaData();
         String[] labels = rowSetMetaData.getColumnNames();
 
-        List<MemRow> itemList = new ArrayList<>();
+        List<DataRow> itemList = new ArrayList<>();
         while (set.next()) {
             Map<String, Object> map = new HashMap<>();
             for (String label : labels) {
                 map.put(label, set.getObject(label));
             }
-            itemList.add(new MemRowImpl(labels, map));
+            itemList.add(new DataRowImpl(labels, map));
         }
-        return new MemSetImpl(itemList);
+        return new DataSetImpl(itemList);
     }
 
     public List<Map<String, Object>> queryForList(String sql, Object... args) {

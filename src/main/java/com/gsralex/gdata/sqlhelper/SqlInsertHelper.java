@@ -1,6 +1,8 @@
 package com.gsralex.gdata.sqlhelper;
 
+import com.gsralex.gdata.jdbc.JdbcGeneratedKey;
 import com.gsralex.gdata.mapper.*;
+import com.gsralex.gdata.result.DataRow;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -26,6 +28,45 @@ public class SqlInsertHelper implements SqlHelper {
             return false;
         }
         return true;
+    }
+
+
+    public <T> void setIdValue(JdbcGeneratedKey generatedKey, T t) {
+        List<T> list = new ArrayList<>();
+        list.add(t);
+        this.setIdValue(generatedKey, list);
+    }
+
+
+    public <T> void setIdValue(JdbcGeneratedKey generatedKey, List<T> list) {
+        List<Object> keyList = new ArrayList<>();
+        for (DataRow row : generatedKey.getDataSet().getRows()) {
+            keyList.add(row.getObject(1));
+        }
+        setIdValue(keyList, list);
+    }
+
+    public <T> void setIdValue(Object key, T t) {
+        List<Object> keyList = new ArrayList<>();
+        keyList.add(key);
+        List<T> list = new ArrayList<>();
+        list.add(t);
+        setIdValue(keyList, list);
+    }
+
+    public <T> void setIdValue(List<Object> keyList, List<T> list) {
+        List<FieldColumn> columnList = getIdColumns(TypeUtils.getType(list));
+        if (columnList != null && columnList.size() != 0) {
+            int row = 0;
+            for (T t : list) {
+                FieldValue fieldValue = new FieldValue(t);
+                for (FieldColumn column : columnList) {
+                    Object value = keyList.get(row++);
+                    fieldValue.setValue(column.getType(), column.getName(), value);
+                }
+            }
+        }
+
     }
 
     public <T> List<FieldColumn> getIdColumns(Class<T> type) {

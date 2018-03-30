@@ -10,11 +10,11 @@ import java.util.Map;
  * @author gsralex
  * @version 2018/3/28
  */
-public class MemRowImpl implements MemRow {
+public class DataRowImpl implements DataRow {
     private Map<String, Object> map = new HashMap<>();
     private String[] labels;
 
-    public MemRowImpl(String[] labels, Map<String, Object> map) {
+    public DataRowImpl(String[] labels, Map<String, Object> map) {
         this.labels = labels;
         this.map = map;
     }

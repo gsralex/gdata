@@ -3,12 +3,11 @@ package com.gsralex.gdata.jdbctemplate;
 import com.gsralex.gdata.DataSourceConfg;
 import com.gsralex.gdata.domain.Foo;
 import com.gsralex.gdata.domain.FooSource;
-import com.gsralex.gdata.result.MemSet;
+import com.gsralex.gdata.result.DataSet;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -132,15 +131,15 @@ public class JdbcTemplateUtilsTest {
     }
 
     @Test
-    public void queryForMemSet() throws Exception {
+    public void queryForDataSet() throws Exception {
         Foo foo = FooSource.getEntity();
-        templateUtils.insert(foo,true);
-        MemSet meset = templateUtils.queryForMemSet("select * from t_foo where id=? ", new Object[]{foo.getId()});
+        templateUtils.insert(foo, true);
+        DataSet meset = templateUtils.queryForDataSet("select * from t_foo where id=? ", new Object[]{foo.getId()});
         Assert.assertNotEquals(meset.getRows().size(), 0);
         Assert.assertNotEquals(meset.get(0).getInt("id"), null);
         Assert.assertNotEquals(meset.get(0).getString("foo_1"), null);
         Assert.assertNotEquals(meset.get(0).getDate("foo_3"), null);
-        Assert.assertNotEquals(meset.get(0).getBoolean("foo_5"),null);
+        Assert.assertNotEquals(meset.get(0).getBoolean("foo_5"), null);
     }
 
 }

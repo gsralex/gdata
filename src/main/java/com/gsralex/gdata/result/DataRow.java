@@ -10,7 +10,7 @@ import java.util.Map;
  * @author gsralex
  * @version 2018/3/28
  */
-public interface MemRow {
+public interface DataRow {
 
     Map<String, Object> getMap();
 
