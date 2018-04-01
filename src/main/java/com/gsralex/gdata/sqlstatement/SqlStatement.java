@@ -1,10 +1,10 @@
-package com.gsralex.gdata.sqlhelper;
+package com.gsralex.gdata.sqlstatement;
 
 /**
  * @author gsralex
  * @version 2018/3/28
  */
-public interface SqlHelper {
+public interface SqlStatement {
 
     <T> boolean checkValid(Class<T> type);
 

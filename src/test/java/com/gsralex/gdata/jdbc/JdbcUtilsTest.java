@@ -58,7 +58,7 @@ public class JdbcUtilsTest {
         foo.setFoo4(112);
 
         jdbcUtils.update(foo);
-        Foo data = jdbcUtils.get("select * from t_foo where id=?", new Object[]{foo.getId()}, Foo.class);
+        Foo data = jdbcUtils.queryForObject("select * from t_foo where id=?", new Object[]{foo.getId()}, Foo.class);
         Assert.assertEquals(data.getFoo1(), foo.getFoo1());
         Assert.assertEquals(data.getFoo4(), foo.getFoo4());
         Assert.assertNotEquals(data.getFooImg(), null);
@@ -82,7 +82,7 @@ public class JdbcUtilsTest {
         String sql = "update t_foo set foo_1=? where id=?";
         String foo_1 = "123123123";
         jdbcUtils.executeUpdate(sql, new Object[]{foo_1, foo1.getId()});
-        Foo data = jdbcUtils.get("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
+        Foo data = jdbcUtils.queryForObject("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
         Assert.assertEquals(foo_1, data.getFoo1());
     }
 
@@ -91,8 +91,8 @@ public class JdbcUtilsTest {
         Foo foo1 = FooSource.getEntity();
         Assert.assertEquals(true, jdbcUtils.insert(foo1, true));
 
-        Foo fooData = jdbcUtils.get("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
-        Integer cnt = jdbcUtils.get("select count(1) from t_foo", null, Integer.class);
+        Foo fooData = jdbcUtils.queryForObject("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
+        Integer cnt = jdbcUtils.queryForObject("select count(1) from t_foo", null, Integer.class);
         Assert.assertNotEquals(cnt, null);
     }
 
@@ -101,7 +101,7 @@ public class JdbcUtilsTest {
     public void query() throws Exception {
         Foo foo1 = FooSource.getEntity();
         Assert.assertEquals(true, jdbcUtils.insert(foo1, true));
-        List<Foo> fooList = jdbcUtils.getList("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
+        List<Foo> fooList = jdbcUtils.queryForList("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
 
 
         Assert.assertEquals(fooList.size(), 1);
@@ -126,7 +126,7 @@ public class JdbcUtilsTest {
         Assert.assertEquals(jdbcUtils.executeBatch(sql, objList), 2);
 
         String querySql = "select * from t_foo where id in (" + foo1.getId() + "," + foo2.getId() + ")";
-        List<Foo> dataList = jdbcUtils.getList(querySql, null, Foo.class);
+        List<Foo> dataList = jdbcUtils.queryForList(querySql, null, Foo.class);
         Assert.assertEquals(dataList.get(0).getFoo1(), foo_1);
         Assert.assertEquals(dataList.get(1).getFoo1(), foo_1);
     }
@@ -136,7 +136,7 @@ public class JdbcUtilsTest {
         Foo foo = FooSource.getEntity();
         jdbcUtils.insert(foo, true);
         jdbcUtils.delete(foo);
-        Foo data = jdbcUtils.get("select * from t_foo where id=?", new Object[]{foo.getId()}, Foo.class);
+        Foo data = jdbcUtils.queryForObject("select * from t_foo where id=?", new Object[]{foo.getId()}, Foo.class);
         Assert.assertEquals(data, null);
     }
 
@@ -149,7 +149,7 @@ public class JdbcUtilsTest {
         list.add(foo2);
         jdbcUtils.batchInsert(list, true);
         jdbcUtils.batchDelete(list);
-        int size = jdbcUtils.getList("select * from t_foo where id in (" + foo1.getId() + "," + foo2.getId() + ")", null, Foo.class).size();
+        int size = jdbcUtils.queryForList("select * from t_foo where id in (" + foo1.getId() + "," + foo2.getId() + ")", null, Foo.class).size();
         Assert.assertEquals(size, 0);
     }
 
@@ -163,6 +163,27 @@ public class JdbcUtilsTest {
         Assert.assertNotEquals(meset.get(0).getString("foo_1"), null);
         Assert.assertNotEquals(meset.get(0).getDate("foo_3"), null);
         Assert.assertNotEquals(meset.get(0).getBoolean("foo_5"), null);
+    }
+
+    @Test
+    public void transaction() {
+        Foo foo = FooSource.getEntity();
+        jdbcUtils.setAutoCommit(false);
+        jdbcUtils.insert(foo, true);
+        Foo data = jdbcUtils.queryForObject("select * from t_foo where id=? ", new Object[]{foo.getId()}, Foo.class);
+        Foo foo1 = FooSource.getEntity();
+        jdbcUtils.insert(foo1, true);
+        Assert.assertNotEquals(foo1.getId(), 0);
+        jdbcUtils.rollback();
+        jdbcUtils.setAutoCommit(true);
+        Foo foo2 = FooSource.getEntity();
+        jdbcUtils.insert(foo2, true);
+        Assert.assertEquals(foo2.getId(), foo1.getId() + 1);
+        Assert.assertNotEquals(getData(foo2.getId()), null);
+    }
+
+    public Foo getData(long id) {
+        return jdbcUtils.queryForObject("select * from t_foo where id=? ", new Object[]{id}, Foo.class);
     }
 
 }

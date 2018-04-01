@@ -1,6 +1,6 @@
 package com.gsralex.gdata.result;
 
-import com.gsralex.gdata.sqlhelper.JdbcHelper;
+import com.gsralex.gdata.sqlstatement.JdbcHelper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,21 +16,25 @@ import java.util.Map;
 public class DataSetUtils {
 
     public static DataSet getDataSet(ResultSet rs, boolean autoCloseResultSet) throws SQLException {
+        if(rs==null){
+            return new DataSetImpl();
+        }
         try {
             String[] labels = JdbcHelper.getColumnLabels(rs.getMetaData());
-            List<DataRow> dataRows = new ArrayList<>();
+            List<DataRowSet> dataRowSets = new ArrayList<>();
             while (rs.next()) {
                 Map<String, Object> map = new HashMap<>();
                 for (String label : labels) {
                     map.put(label, rs.getObject(label));
                 }
-                DataRow dataRow = new DataRowImpl(labels, map);
-                dataRows.add(dataRow);
+                DataRowSet dataRowSet = new DataRowSetImpl(labels, map);
+                dataRowSets.add(dataRowSet);
             }
-            return new DataSetImpl(dataRows);
+            return new DataSetImpl(dataRowSets);
         } finally {
             if (autoCloseResultSet) {
-                JdbcHelper.closeRs(rs);
+                if (!rs.isClosed())
+                    rs.close();
             }
         }
     }

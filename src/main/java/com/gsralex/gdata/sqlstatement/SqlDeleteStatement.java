@@ -1,4 +1,4 @@
-package com.gsralex.gdata.sqlhelper;
+package com.gsralex.gdata.sqlstatement;
 
 import com.gsralex.gdata.exception.DataException;
 import com.gsralex.gdata.exception.ExceptionMessage;
@@ -14,7 +14,7 @@ import java.util.Map;
  * @author gsralex
  * @version 2018/3/28
  */
-public class SqlDeleteHelper implements SqlHelper {
+public class SqlDeleteStatement implements SqlStatement {
 
     @Override
     public <T> boolean checkValid(Class<T> type) {

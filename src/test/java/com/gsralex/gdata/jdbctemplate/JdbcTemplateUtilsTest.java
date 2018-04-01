@@ -62,7 +62,7 @@ public class JdbcTemplateUtilsTest {
         foo.setFoo4(111);
 
         templateUtils.update(foo);
-        Foo data = templateUtils.get("select * from t_foo where id=?", new Object[]{foo.getId()}, Foo.class);
+        Foo data = templateUtils.queryForObject("select * from t_foo where id=?", new Object[]{foo.getId()}, Foo.class);
         Assert.assertEquals(data.getFoo1(), foo.getFoo1());
         Assert.assertEquals(data.getFoo4(), foo.getFoo4());
 
@@ -86,10 +86,10 @@ public class JdbcTemplateUtilsTest {
         foo1.setFoo3(new Date());
         foo1.setFoo4(1);
         Assert.assertEquals(true, templateUtils.insert(foo1, true));
-        Foo foo1Data = templateUtils.get("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
+        Foo foo1Data = templateUtils.queryForObject("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
         Assert.assertNotEquals(foo1Data, null);
 
-        String cnt = templateUtils.get("select count(1) from t_foo ", null, String.class);
+        String cnt = templateUtils.queryForObject("select count(1) from t_foo ", null, String.class);
         Assert.assertNotEquals(cnt, null);
     }
 
@@ -97,7 +97,7 @@ public class JdbcTemplateUtilsTest {
     public void getList() throws Exception {
         Foo foo1 = FooSource.getEntity();
         Assert.assertEquals(true, templateUtils.insert(foo1, true));
-        List<Foo> fooList = templateUtils.getList("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
+        List<Foo> fooList = templateUtils.queryForList("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
         Assert.assertEquals(fooList.size(), 1);
     }
 
@@ -112,7 +112,7 @@ public class JdbcTemplateUtilsTest {
         Foo foo = FooSource.getEntity();
         templateUtils.insert(foo, true);
         templateUtils.delete(foo);
-        Foo data = templateUtils.get("select * from t_foo where id=?", new Object[]{foo.getId()}, Foo.class);
+        Foo data = templateUtils.queryForObject("select * from t_foo where id=?", new Object[]{foo.getId()}, Foo.class);
         Assert.assertEquals(data, null);
     }
 
@@ -126,7 +126,7 @@ public class JdbcTemplateUtilsTest {
         templateUtils.insert(foo1, true);
         templateUtils.insert(foo2, true);
         templateUtils.batchDelete(list);
-        int size = templateUtils.getList("select * from t_foo where id in (" + foo1.getId() + "," + foo2.getId() + ")", null, Foo.class).size();
+        int size = templateUtils.queryForList("select * from t_foo where id in (" + foo1.getId() + "," + foo2.getId() + ")", null, Foo.class).size();
         Assert.assertEquals(size, 0);
     }
 

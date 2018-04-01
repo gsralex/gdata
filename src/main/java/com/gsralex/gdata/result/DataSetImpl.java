@@ -11,19 +11,23 @@ import java.util.List;
 public class DataSetImpl implements DataSet {
 
 
-    private List<DataRow> dataRows = new ArrayList<>();
+    private List<DataRowSet> dataRowSets;
 
-    public DataSetImpl(List<DataRow> dataRows) {
-        this.dataRows = dataRows;
+    public DataSetImpl() {
+        this.dataRowSets = new ArrayList<>();
+    }
+
+    public DataSetImpl(List<DataRowSet> dataRowSets) {
+        this.dataRowSets = dataRowSets;
     }
 
     @Override
-    public DataRow get(int row) {
-        return dataRows.get(row);
+    public DataRowSet get(int row) {
+        return dataRowSets.get(row);
     }
 
     @Override
-    public List<DataRow> getRows() {
-        return dataRows;
+    public List<DataRowSet> getRows() {
+        return dataRowSets;
     }
 }

@@ -10,11 +10,11 @@ import java.util.Map;
  * @author gsralex
  * @version 2018/3/28
  */
-public class DataRowImpl implements DataRow {
+public class DataRowSetImpl implements DataRowSet {
     private Map<String, Object> map = new HashMap<>();
     private String[] labels;
 
-    public DataRowImpl(String[] labels, Map<String, Object> map) {
+    public DataRowSetImpl(String[] labels, Map<String, Object> map) {
         this.labels = labels;
         this.map = map;
     }

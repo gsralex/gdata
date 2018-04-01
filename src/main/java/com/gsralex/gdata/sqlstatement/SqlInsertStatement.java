@@ -1,8 +1,9 @@
-package com.gsralex.gdata.sqlhelper;
+package com.gsralex.gdata.sqlstatement;
 
 import com.gsralex.gdata.jdbc.JdbcGeneratedKey;
 import com.gsralex.gdata.mapper.*;
-import com.gsralex.gdata.result.DataRow;
+import com.gsralex.gdata.result.DataRowSet;
+import com.gsralex.gdata.utils.TypeUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.Map;
  * @author gsralex
  * @version 2018/3/15
  */
-public class SqlInsertHelper implements SqlHelper {
+public class SqlInsertStatement implements SqlStatement {
 
     public <T> boolean existsGenerateKey(Class<T> type) {
         Mapper mapper = MapperHolder.getMapperCache(type);
@@ -40,7 +41,7 @@ public class SqlInsertHelper implements SqlHelper {
 
     public <T> void setIdValue(JdbcGeneratedKey generatedKey, List<T> list) {
         List<Object> keyList = new ArrayList<>();
-        for (DataRow row : generatedKey.getDataSet().getRows()) {
+        for (DataRowSet row : generatedKey.getDataSet().getRows()) {
             keyList.add(row.getObject(1));
         }
         setIdValue(keyList, list);

@@ -8,7 +8,7 @@ import java.util.List;
  */
 public interface DataSet {
 
-    DataRow get(int row);
+    DataRowSet get(int row);
 
-    List<DataRow> getRows();
+    List<DataRowSet> getRows();
 }

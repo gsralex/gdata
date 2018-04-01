@@ -2,11 +2,10 @@ package com.gsralex.gdata.jdbc;
 
 
 import com.gsralex.gdata.exception.DataException;
-import com.gsralex.gdata.mapper.FieldColumn;
-import com.gsralex.gdata.mapper.FieldValue;
 import com.gsralex.gdata.mapper.MapperHelper;
 import com.gsralex.gdata.result.*;
-import com.gsralex.gdata.sqlhelper.*;
+import com.gsralex.gdata.sqlstatement.*;
+import com.gsralex.gdata.utils.TypeUtils;
 import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
@@ -24,18 +23,18 @@ public class JdbcUtils {
     private static Logger LOGGER = Logger.getLogger(JdbcUtils.class);
 
     private DataSource dataSource;
-    private SqlInsertHelper insertHelper;
-    private SqlUpdateHelper updateHelper;
+    private SqlInsertStatement insertStatement;
+    private SqlUpdateStatement updateStatement;
     private MapperHelper mapperHelper;
-    private SqlDeleteHelper deleteHelper;
+    private SqlDeleteStatement deleteStatement;
 
 
     public JdbcUtils(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.insertHelper = new SqlInsertHelper();
-        this.updateHelper = new SqlUpdateHelper();
+        this.insertStatement = new SqlInsertStatement();
+        this.updateStatement = new SqlUpdateStatement();
         this.mapperHelper = new MapperHelper();
-        this.deleteHelper = new SqlDeleteHelper();
+        this.deleteStatement = new SqlDeleteStatement();
     }
 
     public <T> boolean insert(T t) {
@@ -47,7 +46,7 @@ public class JdbcUtils {
             return false;
         }
         if (generatedKey) {
-            if (insertHelper.existsGenerateKey(t.getClass())) {
+            if (insertStatement.existsGenerateKey(t.getClass())) {
                 return insertGeneratedKey(t);
             } else {
                 return insertBean(t);
@@ -61,19 +60,20 @@ public class JdbcUtils {
         if (t == null) {
             return false;
         }
-        Object[] objects = insertHelper.getObjects(t);
-        String sql = insertHelper.getSql(t.getClass());
+        Object[] objects = insertStatement.getObjects(t);
+        String sql = insertStatement.getSql(t.getClass());
         return executeUpdate(sql, objects) != 0 ? true : false;
     }
 
     private <T> boolean insertGeneratedKey(T t) {
         Class type = t.getClass();
-        String sql = insertHelper.getSql(type);
-        Object[] objects = insertHelper.getObjects(t);
+        String sql = insertStatement.getSql(type);
+        Object[] objects = insertStatement.getObjects(t);
         JdbcGeneratedKey generatedKey = executeUpdateGenerateKey(sql, objects);
-        insertHelper.setIdValue(generatedKey, t);
+        insertStatement.setIdValue(generatedKey, t);
         return generatedKey.getResult() != 0 ? true : false;
     }
+
 
     public <T> int batchInsert(List<T> list) {
         return batchInsert(list, false);
@@ -84,7 +84,7 @@ public class JdbcUtils {
             return 0;
         if (generatedKey) {
             Class type = TypeUtils.getType(list);
-            if (insertHelper.existsGenerateKey(type)) {
+            if (insertStatement.existsGenerateKey(type)) {
                 return batchInsertGeneratedKey(list);
             } else {
                 return batchInsertBean(list);
@@ -95,38 +95,29 @@ public class JdbcUtils {
     }
 
     private <T> int batchInsertBean(List<T> list) {
-        String sql = insertHelper.getSql(TypeUtils.getType(list));
+        String sql = insertStatement.getSql(TypeUtils.getType(list));
         List<Object[]> objectList = new ArrayList<>();
         for (T t : list) {
-            objectList.add(insertHelper.getObjects(t));
+            objectList.add(insertStatement.getObjects(t));
         }
         return executeBatch(sql, objectList);
     }
 
     private <T> int batchInsertGeneratedKey(List<T> list) {
         Class type = TypeUtils.getType(list);
-        String sql = insertHelper.getSql(type);
+        String sql = insertStatement.getSql(type);
         List<Object[]> objectList = new ArrayList<>();
         for (T t : list) {
-            objectList.add(insertHelper.getObjects(t));
+            objectList.add(insertStatement.getObjects(t));
         }
         JdbcGeneratedKey generatedKey = executeBatchGeneratedKey(sql, objectList);
-        insertHelper.setIdValue(generatedKey, list);
+        insertStatement.setIdValue(generatedKey, list);
         return generatedKey.getResult();
     }
 
 
     public JdbcGeneratedKey executeUpdateGenerateKey(String sql, Object[] objects) {
-        PreparedStatement ps = null;
-        try {
-            ps = pre(sql, objects, true);
-            int r = ps.executeUpdate();
-            return new JdbcGeneratedKey(r, DataSetUtils.getDataSet(ps.getGeneratedKeys(), true));
-        } catch (SQLException e) {
-            throw new DataException("executeUpdateGenerateKey", e);
-        } finally {
-            JdbcHelper.closePsConn(ps);
-        }
+        return executeUpdate(sql, objects, true);
     }
 
 
@@ -135,47 +126,15 @@ public class JdbcUtils {
     }
 
 
-    private JdbcGeneratedKey executeBatch(String sql, List<Object[]> objectsList, boolean autoGeneratedKeys) {
-        PreparedStatement ps = null;
-        DataSet dataSet = null;
-        int result = 0;
-        try {
-            Connection conn = getConnection();
-            conn.setAutoCommit(false);
-            if (autoGeneratedKeys) {
-                ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            } else {
-                ps = conn.prepareStatement(sql);
-            }
-            for (Object[] objects : objectsList) {
-                for (int i = 0, size = objects.length; i < size; i++) {
-                    ps.setObject(i + 1, objects[i]);
-                }
-                ps.addBatch();
-            }
-            int[] r = ps.executeBatch();
-            ps.getConnection().commit();
-            result = JdbcHelper.getBatchResult(r);
-            if (autoGeneratedKeys) {
-                dataSet = DataSetUtils.getDataSet(ps.getGeneratedKeys(), true);
-            }
-        } catch (SQLException e) {
-        } finally {
-            JdbcHelper.closePsConn(ps);
-        }
-        return new JdbcGeneratedKey(result, dataSet);
-    }
-
-
     public <T> boolean update(T t) {
         if (t == null)
             return false;
         Class type = t.getClass();
-        if (!updateHelper.checkValid(type)) {
+        if (!updateStatement.checkValid(type)) {
             return false;
         }
-        String sql = updateHelper.getSql(type);
-        Object[] objects = updateHelper.getObjects(t);
+        String sql = updateStatement.getSql(type);
+        Object[] objects = updateStatement.getObjects(t);
         return executeUpdate(sql, objects) != 0 ? true : false;
     }
 
@@ -184,13 +143,13 @@ public class JdbcUtils {
             return 0;
         }
         Class<T> type = (Class<T>) list.get(0).getClass();
-        if (!updateHelper.checkValid(type)) {
+        if (!updateStatement.checkValid(type)) {
             return 0;
         }
-        String sql = updateHelper.getSql(type);
+        String sql = updateStatement.getSql(type);
         List<Object[]> objectList = new ArrayList<>();
         for (T t : list) {
-            objectList.add(updateHelper.getObjects(t));
+            objectList.add(updateStatement.getObjects(t));
         }
         return executeBatch(sql, objectList);
     }
@@ -201,63 +160,54 @@ public class JdbcUtils {
 
 
     public int executeUpdate(String sql, Object[] objects) {
-        PreparedStatement ps = null;
-        try {
-            ps = pre(sql, objects);
-            return ps.executeUpdate();
-        } catch (SQLException e) {
-            LOGGER.error("JdbcHelper.executeUpdate", e);
-            return 0;
-        } finally {
-            JdbcHelper.closePsConn(ps);
-        }
+        return executeUpdate(sql, objects, false).getResult();
     }
 
-    public <T> T get(String sql, Object[] objects, Class<T> type) {
-        List<T> list = getList(sql, objects, type);
+    public <T> T queryForObject(String sql, Object[] objects, Class<T> type) {
+        List<T> list = queryForList(sql, objects, type);
         if (list != null && list.size() != 0) {
             return list.get(0);
         }
         return null;
     }
 
-    public <T> List<T> getList(String sql, Object[] objects, Class<T> type) {
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            ps = pre(sql, objects);
-            rs = ps.executeQuery();
-            return mapperList(rs, type);
-        } catch (SQLException e) {
-            LOGGER.error("JdbcHelper.getList", e);
-            return null;
-        } finally {
-            JdbcHelper.closeRs(rs);
-            JdbcHelper.closePsConn(ps);
-        }
+    public <T> List<T> queryForList(String sql, Object[] objects, Class<T> type) {
+        List<T> list = new ArrayList<>();
+        executeQuery(sql, objects, new ResultCallback() {
+            @Override
+            public void mapper(ResultSet rs) {
+                try {
+                    while (rs.next()) {
+                        list.add(mapperHelper.mapperEntity(rs, type));
+                    }
+                } catch (SQLException e) {
+                }
+            }
+        });
+        return list;
+
     }
 
     public DataSet queryForDataSet(String sql, Object... objects) {
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            ps = pre(sql, objects);
-            rs = ps.executeQuery();
-            return DataSetUtils.getDataSet(rs, false);
-        } catch (SQLException e) {
-            throw new DataException("queryForDataSet", e);
-        } finally {
-            JdbcHelper.closeRs(rs);
-            JdbcHelper.closePs(ps);
-        }
+        final DataSet[] dataSet = {null};
+        executeQuery(sql, objects, new ResultCallback() {
+            @Override
+            public void mapper(ResultSet rs) {
+                try {
+                    dataSet[0] = DataSetUtils.getDataSet(rs, false);
+                } catch (SQLException e) {
+                }
+            }
+        });
+        return dataSet[0];
     }
 
 
     public List<Map<String, Object>> queryForList(String sql, Object... objects) {
         DataSet dataSet = queryForDataSet(sql, objects);
         List<Map<String, Object>> mapList = new ArrayList<>();
-        for (DataRow dataRow : dataSet.getRows()) {
-            mapList.add(dataRow.getMap());
+        for (DataRowSet dataRowSet : dataSet.getRows()) {
+            mapList.add(dataRowSet.getMap());
         }
         return mapList;
     }
@@ -267,11 +217,11 @@ public class JdbcUtils {
             return false;
         }
         Class type = t.getClass();
-        if (!deleteHelper.checkValid(type)) {
+        if (!deleteStatement.checkValid(type)) {
             return false;
         }
-        String sql = deleteHelper.getSql(type);
-        Object[] objects = deleteHelper.getObjects(t);
+        String sql = deleteStatement.getSql(type);
+        Object[] objects = deleteStatement.getObjects(t);
         return executeUpdate(sql, objects) != 0 ? true : false;
     }
 
@@ -280,63 +230,154 @@ public class JdbcUtils {
             return 0;
         }
         Class type = TypeUtils.getType(list);
-        if (!deleteHelper.checkValid(type)) {
+        if (!deleteStatement.checkValid(type)) {
             return 0;
         }
-        String sql = deleteHelper.getSql(type);
+        String sql = deleteStatement.getSql(type);
         List<Object[]> argList = new ArrayList<>();
         for (T t : list) {
-            Object[] objects = deleteHelper.getObjects(t);
+            Object[] objects = deleteStatement.getObjects(t);
             argList.add(objects);
         }
         return executeBatch(sql, argList);
     }
 
 
-    private <T> List<T> mapperList(ResultSet rs, Class<T> type) {
-        List<T> list = new ArrayList<>();
+    //事务支持
+
+    public void setAutoCommit(boolean autoCommit) {
+        Connection connection = JdbcConnHolder.getConnection(this.dataSource);
         try {
-            while (rs.next()) {
-                list.add(mapperHelper.mapperEntity(rs, type));
+            connection.setAutoCommit(autoCommit);
+        } catch (SQLException e) {
+            throw new DataException("setAutoCommit", e);
+        }
+    }
+
+    public boolean getAutoCommit() {
+        Connection connection = JdbcConnHolder.getConnection(this.dataSource);
+
+        try {
+            return connection.getAutoCommit();
+        } catch (SQLException e) {
+            throw new DataException("getAutoCommit", e);
+        }
+    }
+
+    public void commit() {
+        Connection connection = JdbcConnHolder.getConnection(this.dataSource);
+        try {
+            connection.commit();
+        } catch (SQLException e) {
+            throw new DataException("commit", e);
+        } finally {
+            JdbcConnHolder.closeConnection();
+        }
+    }
+
+    public void rollback() {
+        Connection connection = JdbcConnHolder.getConnection(this.dataSource);
+        try {
+            connection.rollback();
+        } catch (SQLException e) {
+            throw new DataException("rollback", e);
+        }
+    }
+
+
+    private void executeQuery(String sql, Object[] objects, ResultCallback resultCallback) {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            Connection conn = JdbcConnHolder.getConnection(this.dataSource);
+            ps = conn.prepareStatement(sql);
+            if (objects != null) {
+                for (int i = 0; i < objects.length; i++) {
+                    ps.setObject(i + 1, objects[i]);
+                }
+            }
+            rs = ps.executeQuery();
+            if (resultCallback != null) {
+                resultCallback.mapper(rs);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DataException("executeQuery", e);
+        } finally {
+            ResultUtils.closeResultSet(rs);
+            PreparedStatementUtils.clearStatement(ps);
+            if(getAutoCommit()) {
+                JdbcConnHolder.closeConnection();
+            }
         }
-        return list;
     }
 
-
-    private PreparedStatement pre(String sql, Object[] objects) {
-        return pre(sql, objects, false);
-    }
-
-    private PreparedStatement pre(String sql, Object[] objects, boolean autoGeneratedKeys) {
+    private JdbcGeneratedKey executeUpdate(String sql, Object[] objects, boolean autoGeneratedKey) {
+        PreparedStatement ps = null;
         try {
-            Connection conn = getConnection();
-            PreparedStatement ps;
+            Connection conn = JdbcConnHolder.getConnection(this.dataSource);
+            if (autoGeneratedKey) {
+                ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            } else {
+                ps = conn.prepareStatement(sql);
+            }
+            if (objects != null) {
+                for (int i = 0; i < objects.length; i++) {
+                    ps.setObject(i + 1, objects[i]);
+                }
+            }
+            int r = ps.executeUpdate();
+            DataSet dataSet = null;
+            if (r != 0) {
+                if (autoGeneratedKey) {
+                    dataSet = DataSetUtils.getDataSet(ps.getGeneratedKeys(), true);
+                }
+            }
+            return new JdbcGeneratedKey(r, dataSet);
+        } catch (SQLException e) {
+            throw new DataException("executeUpdate", e);
+        } finally {
+            PreparedStatementUtils.clearStatement(ps);
+            if(getAutoCommit()) {
+                JdbcConnHolder.closeConnection();
+            }
+        }
+    }
+
+    private JdbcGeneratedKey executeBatch(String sql, List<Object[]> objectsList, boolean autoGeneratedKeys) {
+        PreparedStatement ps = null;
+        try {
+            Connection conn = JdbcConnHolder.getConnection(this.dataSource);
+            conn.setAutoCommit(false);
             if (autoGeneratedKeys) {
                 ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             } else {
                 ps = conn.prepareStatement(sql);
             }
-            if (objects != null && objects.length != 0) {
-                for (int i = 0; i < objects.length; i++) {
-                    ps.setObject(i + 1, objects[i]);
+            if (objectsList != null) {
+                for (Object[] objects : objectsList) {
+                    if (objects != null) {
+                        for (int i = 0, size = objects.length; i < size; i++) {
+                            ps.setObject(i + 1, objects[i]);
+                        }
+                        ps.addBatch();
+                    }
                 }
             }
-            return ps;
+            int[] r = ps.executeBatch();
+            ps.getConnection().commit();
+            int result = JdbcHelper.getBatchResult(r);
+            DataSet dataSet = null;
+            if (autoGeneratedKeys) {
+                dataSet = DataSetUtils.getDataSet(ps.getGeneratedKeys(), true);
+            }
+            return new JdbcGeneratedKey(result, dataSet);
         } catch (SQLException e) {
-            LOGGER.error("JdbcHelper.pre", e);
-            return null;
-        }
-    }
-
-    private Connection getConnection() {
-        try {
-            return this.dataSource.getConnection();
-        } catch (SQLException e) {
-            LOGGER.error("JdbcHelper.getConnection", e);
-            return null;
+            throw new DataException("executeBatch", e);
+        } finally {
+            PreparedStatementUtils.clearBatchStatemt(ps);
+            if(getAutoCommit()) {
+                JdbcConnHolder.closeConnection();
+            }
         }
     }
 }
