@@ -59,8 +59,22 @@ Integer cnt=jdbcUtils.queryForObject("select count(1) from t_foo",null,Integer.c
 
 boolean ok=jdbcUtils.delete(foo);
 
-
  ```
+ 
+支持手动事务
+ ``` java
+
+  jdbcUtils.setAutoCommit(false);
+  
+  jdbcUtils.insert(foo, true); id:1
+  jdbcUtils.insert(foo1, true); id:2
+  
+  jdbcUtils.rollback();//没有实际插入
+  
+  jdbcUtils.insert(foo2, true); id:3
+  jdbcUtils.commmit();//只插入一条id:3
+  
+```
 
 ChangeLog
 --------
