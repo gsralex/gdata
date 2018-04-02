@@ -5,7 +5,7 @@ import com.gsralex.gdata.result.DataRowSet;
 import com.gsralex.gdata.result.DataSet;
 import com.gsralex.gdata.result.DataRowSetImpl;
 import com.gsralex.gdata.result.DataSetImpl;
-import com.gsralex.gdata.utils.TypeUtils;
+import com.gsralex.gdata.mapper.TypeUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -35,9 +35,9 @@ public class JdbcTemplateUtils {
 
     public JdbcTemplateUtils(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.insertStatement = new SqlInsertStatement();
-        this.updateStatement = new SqlUpdateStatement();
-        this.deleteStatement = new SqlDeleteStatement();
+        this.insertStatement = new SqlInsertStatement(dataSource);
+        this.updateStatement = new SqlUpdateStatement(dataSource);
+        this.deleteStatement = new SqlDeleteStatement(dataSource);
     }
 
 

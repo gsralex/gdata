@@ -5,7 +5,7 @@ import com.gsralex.gdata.exception.DataException;
 import com.gsralex.gdata.mapper.MapperHelper;
 import com.gsralex.gdata.result.*;
 import com.gsralex.gdata.sqlstatement.*;
-import com.gsralex.gdata.utils.TypeUtils;
+import com.gsralex.gdata.mapper.TypeUtils;
 import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
@@ -31,10 +31,10 @@ public class JdbcUtils {
 
     public JdbcUtils(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.insertStatement = new SqlInsertStatement();
-        this.updateStatement = new SqlUpdateStatement();
+        this.insertStatement = new SqlInsertStatement(dataSource);
+        this.updateStatement = new SqlUpdateStatement(dataSource);
         this.mapperHelper = new MapperHelper();
-        this.deleteStatement = new SqlDeleteStatement();
+        this.deleteStatement = new SqlDeleteStatement(dataSource);
     }
 
     public <T> boolean insert(T t) {

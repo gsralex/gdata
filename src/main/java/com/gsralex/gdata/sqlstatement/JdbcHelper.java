@@ -1,5 +1,6 @@
 package com.gsralex.gdata.sqlstatement;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,15 @@ public class JdbcHelper {
             }
         }
         return cnt;
+    }
+
+
+    public static String getProductName(DataSource dataSource) {
+        try {
+            return dataSource.getConnection().getMetaData().getDatabaseProductName();
+        } catch (SQLException e) {
+            return "";
+        }
     }
 
 }

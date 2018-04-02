@@ -5,6 +5,7 @@ import com.gsralex.gdata.exception.ExceptionMessage;
 import com.gsralex.gdata.mapper.*;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,12 @@ import java.util.Map;
  * @version 2018/3/28
  */
 public class SqlDeleteStatement implements SqlStatement {
+
+    private String productName;
+
+    public SqlDeleteStatement(DataSource dataSource) {
+        productName = JdbcHelper.getProductName(dataSource);
+    }
 
     @Override
     public <T> boolean checkValid(Class<T> type) {
@@ -28,17 +35,19 @@ public class SqlDeleteStatement implements SqlStatement {
     @Override
     public <T> String getSql(Class<T> type) {
         Mapper mapper = MapperHolder.getMapperCache(type);
-        String sql = String.format("delete from `%s` ", mapper.getTableName());
+        StringBuilder sql = new StringBuilder();
 
-        sql += "where";
+        String tableName = String.format(SqlAlias.getAliasFormat(productName), mapper.getTableName());
+        sql.append(String.format("delete from %s ", tableName));
+        sql.append("where");
         for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
             FieldColumn column = entry.getValue();
             if (column.isId()) {
-                sql += String.format(" `%s`=? and", column.getLabel());
+                String label = String.format(SqlAlias.getAliasFormat(productName), column.getLabel());
+                sql.append(String.format(" %s=? and", label));
             }
         }
-        sql = StringUtils.removeEnd(sql, "and");
-        return sql;
+        return StringUtils.removeEnd(sql.toString(), "and");
     }
 
     @Override

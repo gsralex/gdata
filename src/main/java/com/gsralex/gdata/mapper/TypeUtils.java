@@ -1,4 +1,4 @@
-package com.gsralex.gdata.utils;
+package com.gsralex.gdata.mapper;
 
 import java.util.List;
 

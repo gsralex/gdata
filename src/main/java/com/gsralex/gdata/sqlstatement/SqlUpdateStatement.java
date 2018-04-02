@@ -5,6 +5,7 @@ import com.gsralex.gdata.exception.ExceptionMessage;
 import com.gsralex.gdata.mapper.*;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,12 @@ import java.util.Map;
  * @version 2018/3/15
  */
 public class SqlUpdateStatement implements SqlStatement {
+
+    private String productName;
+
+    public SqlUpdateStatement(DataSource dataSource) {
+        productName = JdbcHelper.getProductName(dataSource);
+    }
 
     @Override
     public boolean checkValid(Class type) {
@@ -27,23 +34,27 @@ public class SqlUpdateStatement implements SqlStatement {
     @Override
     public <T> String getSql(Class<T> type) {
         Mapper mapper = MapperHolder.getMapperCache(type);
-        String sql = String.format("update `%s` set ", mapper.getTableName());
+        StringBuilder sql = new StringBuilder();
+        String tableName = String.format(SqlAlias.getAliasFormat(productName), mapper.getTableName());
+
+        sql.append(String.format("update %s ", tableName));
+        sql.append("set ");
         for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
             FieldColumn column = entry.getValue();
             if (!column.isId()) {
-                sql += String.format("`%s`=?,", column.getLabel());
+                String label = String.format(SqlAlias.getAliasFormat(productName), column.getLabel());
+                sql.append(String.format("%s=?,", label));
             }
         }
-        sql = StringUtils.removeEnd(sql, ",");
-        sql += " where ";
+        sql = sql.deleteCharAt(sql.length() - 1);
+        sql.append(" where ");
         for (Map.Entry<String, FieldColumn> entry : mapper.getMapper().entrySet()) {
             FieldColumn column = entry.getValue();
             if (column.isId()) {
-                sql += String.format(" `%s`=? and", column.getLabel());
+                sql.append(String.format(" `%s`=? and", column.getLabel()));
             }
         }
-        sql = StringUtils.removeEnd(sql, "and");
-        return sql;
+        return StringUtils.remove(sql.toString(), "and");
     }
 
     @Override
