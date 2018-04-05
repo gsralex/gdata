@@ -4,7 +4,11 @@
 
     <groupId>com.gsralex</groupId>
     <artifactId>gdata</artifactId>
+    <packaging>pom</packaging>
     <version>1.05</version>
+    <modules>
+        <module>gdata-bean</module>
+    </modules>
 
     <name>gdata</name>
     <description>jdbc,javatemplate bean insert,update and mapper.</description>
