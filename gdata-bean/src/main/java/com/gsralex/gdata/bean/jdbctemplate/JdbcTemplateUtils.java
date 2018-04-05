@@ -1,5 +1,8 @@
 package com.gsralex.gdata.bean.jdbctemplate;
 
+import com.gsralex.gdata.bean.placeholder.BeanSource;
+import com.gsralex.gdata.bean.placeholder.SqlObject;
+import com.gsralex.gdata.bean.placeholder.ValueConverterImpl;
 import com.gsralex.gdata.bean.result.DataRowSet;
 import com.gsralex.gdata.bean.result.DataRowSetImpl;
 import com.gsralex.gdata.bean.result.DataSet;
@@ -86,7 +89,7 @@ public class JdbcTemplateUtils {
         return r != 0 ? true : false;
     }
 
-    public  <T> int batchInsert(List<T> list) {
+    public <T> int batchInsert(List<T> list) {
         if (list == null || list.size() == 0) {
             return 0;
         }
@@ -130,15 +133,42 @@ public class JdbcTemplateUtils {
 
 
     public <T> T queryForObject(String sql, Object[] args, Class<T> type) {
-        List<T> list = jdbcTemplate.query(sql, args, new BeanRowMapper<>(type));
+        List<T> list = queryForList(sql, args, type);
         if (list != null && list.size() != 0) {
             return list.get(0);
         }
         return null;
     }
 
+    public <T> T queryForObjectP(String pSql, Map<String, Object> paramMap, Class<T> type) {
+        List<T> list = queryForListP(pSql, paramMap, type);
+        if (list != null && list.size() != 0) {
+            return list.get(0);
+        }
+        return null;
+    }
+
+    public <T> T queryForObjectP(String pSql, BeanSource beanSource, Class<T> type) {
+        List<T> list = queryForListP(pSql, beanSource, type);
+        if (list != null && list.size() != 0) {
+            return list.get(0);
+        }
+        return null;
+    }
+
+
     public <T> List<T> queryForList(String sql, Object[] args, Class<T> type) {
         return jdbcTemplate.query(sql, args, new BeanRowMapper<>(type));
+    }
+
+    public <T> List<T> queryForListP(String pSql, Map<String, Object> paramMap, Class<T> type) {
+        SqlObject sqlObject = ValueConverterImpl.getInstance().convertMap(pSql, paramMap);
+        return queryForList(sqlObject.getSql(), sqlObject.getObjects(), type);
+    }
+
+    public <T> List<T> queryForListP(String pSql, BeanSource beanSource, Class<T> type) {
+        SqlObject sqlObject = ValueConverterImpl.getInstance().convertBeanSource(pSql, beanSource);
+        return queryForList(sqlObject.getSql(), sqlObject.getObjects(), type);
     }
 
 
@@ -158,6 +188,16 @@ public class JdbcTemplateUtils {
         return new DataSetImpl(itemList);
     }
 
+    public DataSet queryForDataSetP(String pSql, Map<String, Object> paramMap) {
+        SqlObject sqlObject = ValueConverterImpl.getInstance().convertMap(pSql, paramMap);
+        return queryForDataSet(sqlObject.getSql(), sqlObject.getObjects());
+    }
+
+    public DataSet queryForDataSetP(String pSql, BeanSource beanSource) {
+        SqlObject sqlObject = ValueConverterImpl.getInstance().convertBeanSource(pSql, beanSource);
+        return queryForDataSet(sqlObject.getSql(), sqlObject.getObjects());
+    }
+
     public List<Map<String, Object>> queryForList(String sql, Object... args) {
         return jdbcTemplate.queryForList(sql, args);
     }
@@ -169,7 +209,6 @@ public class JdbcTemplateUtils {
     public int update(String sql, Object... args) {
         return jdbcTemplate.update(sql, args);
     }
-
 
     public <T> boolean delete(T t) {
         if (t == null) {

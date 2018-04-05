@@ -2,7 +2,11 @@ package com.gsralex.gdata.bean.placeholder;
 
 import com.gsralex.gdata.bean.domain.Foo;
 import com.gsralex.gdata.bean.domain.FooSource;
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author gsralex
@@ -10,11 +14,29 @@ import org.junit.Test;
  */
 public class ValueConverterImplTest {
     @Test
-    public void convert() throws Exception {
+    public void convertObject() throws Exception {
         ValueConverter valueConverter = new ValueConverterImpl();
         Foo foo = FooSource.getEntity();
-        String namedSql = "select * from #table where #id=? and #foo=:foo1 and #foo1  in （select #foo1 from where id=?）";
-        valueConverter.convert(namedSql, Foo.class, foo, new Object[]{1, 1});
+        String pSql = "select * from #table where id=:id and foo=:foo1 and id=:id";
+        SqlObject sqlObject = valueConverter.convertBeanSource(pSql, new BeanSource(foo));
+
+        Assert.assertEquals(sqlObject.getSql(), "select * from #table where id=? and foo=? and id=?");
+        Assert.assertEquals(sqlObject.getObjects().length, 3);
+    }
+
+
+    @Test
+    public void convertMap() throws Exception {
+        ValueConverter valueConverter = new ValueConverterImpl();
+        Foo foo = FooSource.getEntity();
+        String pSql = "select * from #table where id=:id and foo=:foo1 and id=:id";
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("Id", foo.getId());
+        paramMap.put("foo1", foo.getFoo1());
+        SqlObject sqlObject = valueConverter.convertMap(pSql, paramMap);
+
+        Assert.assertEquals(sqlObject.getSql(), "select * from #table where id=? and foo=? and id=?");
+        Assert.assertEquals(sqlObject.getObjects().length, 3);
     }
 
 }

@@ -3,14 +3,13 @@ package com.gsralex.gdata.bean.jdbc;
 import com.gsralex.gdata.bean.DataSourceConfg;
 import com.gsralex.gdata.bean.domain.FooSource;
 import com.gsralex.gdata.bean.domain.Foo;
+import com.gsralex.gdata.bean.placeholder.BeanSource;
 import com.gsralex.gdata.bean.result.DataSet;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author gsralex
@@ -184,6 +183,22 @@ public class JdbcUtilsTest {
 
     public Foo getData(long id) {
         return jdbcUtils.queryForObject("select * from t_foo where id=? ", new Object[]{id}, Foo.class);
+    }
+
+    @Test
+    public void updateP() {
+        Foo foo = FooSource.getEntity();
+        jdbcUtils.insert(foo, true);
+        Map<String, Object> map = new HashMap<>();
+        map.put("Foo1", "t_123");
+        map.put("Id", foo.getId());
+        jdbcUtils.executeUpdateP("update t_foo set foo_1=:foo1 where id=:id", map);
+        Foo data = getData(foo.getId());
+        Assert.assertEquals(data.getFoo1(), "t_123");
+        foo.setFoo1("t_1234");
+        jdbcUtils.executeUpdateP("update t_foo set foo_1=:foo1 where id=:id", new BeanSource(foo));
+        Foo data1 = getData(foo.getId());
+        Assert.assertEquals(data1.getFoo1(), "t_1234");
     }
 
 }
