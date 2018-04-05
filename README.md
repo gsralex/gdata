@@ -27,7 +27,7 @@ api层面尽量和jdbctemplate保持一致
  public class Foo {
 
     @Id
-    @Column(name = "id") //如果数据库字段名与类字段，可以不用写@Column注解
+    @Column(name = "id") //如果数据库字段名与类字段名相同，可以不用写@Column注解
     private Long id;
 
     @Column(name = "foo_1")
