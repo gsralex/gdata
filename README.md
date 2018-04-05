@@ -16,7 +16,8 @@ Maven
 
 例子
 --------
-api层面尽量和jdbctemplate保持一致
+api层面尽量和jdbctemplate保持一致  
+PS：插一句其他的，我个人不喜欢MyBatis的sql语句的处理方式，无论是xml还是注解sql。主要原因是xml和注解的表达能力都较弱，在动态查询方面捉襟见肘，灵活性较差。所以比较推崇jdbctemplate的sql直接写在代码的设计，灵活性无疑是最重要的。
 
 
 #### bean操作
