@@ -17,6 +17,10 @@ Maven
 例子
 --------
 api层面尽量和jdbctemplate保持一致
+
+
+bean操作
+
  ``` java
  JdbcUtils jdbcUtils = new JdbcUtils(DataSourceConfg.getDataSource());
  @Table(name = "t_foo")
@@ -51,11 +55,13 @@ Assert.assertNotEquals(0, foo.getId()); //ok
 foo.setFoo4(123123);
 jdbcUtils.update(foo);
   
-Foo data=jdbcUtils.queryForObject("select * from t_foo where id=?",new Object[]{1},Foo.class); //queryForObject 支持复杂类型
+//queryForObject 支持复杂类型
+Foo data=jdbcUtils.queryForObject("select * from t_foo where id=?",new Object[]{1},Foo.class); 
 
 List<Foo> list=jdbcUtils.queryForList("select * from t_foo",null,Foo.class);
 
-Integer cnt=jdbcUtils.queryForObject("select count(1) from t_foo",null,Integer.class); //queryForObject 支持简单类型
+//queryForObject 支持简单类型
+Integer cnt=jdbcUtils.queryForObject("select count(1) from t_foo",null,Integer.class); 
 
 
 boolean ok=jdbcUtils.delete(foo);
@@ -63,7 +69,7 @@ boolean ok=jdbcUtils.delete(foo);
  ```
  
  
- 增加占位符
+ 占位符语法
  
  第一种写法，使用Map<String,Object>，mapkey不区分大小写，sql不区分大小写
  ``` java
@@ -83,6 +89,7 @@ boolean ok=jdbcUtils.delete(foo);
  
  
 支持手动事务
+
  ``` java
 
   jdbcUtils.setAutoCommit(false);
