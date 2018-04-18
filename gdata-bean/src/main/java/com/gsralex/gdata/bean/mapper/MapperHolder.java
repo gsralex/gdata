@@ -39,13 +39,12 @@ public class MapperHolder {
 
 
     private static Mapper getMapper(Class type) {
-        String className = type.getName();
         String tableName;
         Table tbName = (Table) type.getAnnotation(Table.class);
         if (tbName != null) {
             tableName = tbName.name();
         } else {
-            tableName = className;
+            tableName = type.getSimpleName();
         }
 
         Mapper mapper = new Mapper();
