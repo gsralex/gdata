@@ -5,6 +5,9 @@ import com.gsralex.gdata.bean.domain.FooSource;
 import com.gsralex.gdata.bean.domain.Foo;
 import com.gsralex.gdata.bean.placeholder.BeanSource;
 import com.gsralex.gdata.bean.result.DataSet;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,11 +91,23 @@ public class JdbcUtilsTest {
     @Test
     public void get() throws Exception {
         Foo foo1 = FooSource.getEntity();
+        Date now = new Date();
+        foo1.setFooDate(now);
         Assert.assertEquals(true, jdbcUtils.insert(foo1, true));
+
 
         Foo fooData = jdbcUtils.queryForObject("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
         Integer cnt = jdbcUtils.queryForObject("select count(1) from t_foo", null, Integer.class);
         Assert.assertNotEquals(cnt, null);
+
+        //date test
+        String nullTime = "00:00:00";
+        String hhmmss = "HH:mm:ss";
+        String nowH = DateFormatUtils.format(now, hhmmss);
+        String dataH = DateFormatUtils.format(fooData.getFooDate(), hhmmss);
+        if (!StringUtils.equals(nowH, nullTime)) {
+            Assert.assertNotEquals(dataH, nullTime);
+        }
     }
 
 

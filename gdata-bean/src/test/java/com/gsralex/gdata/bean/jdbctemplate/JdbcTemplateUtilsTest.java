@@ -4,10 +4,13 @@ import com.gsralex.gdata.bean.DataSourceConfg;
 import com.gsralex.gdata.bean.domain.Foo;
 import com.gsralex.gdata.bean.domain.FooSource;
 import com.gsralex.gdata.bean.result.DataSet;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -85,12 +88,24 @@ public class JdbcTemplateUtilsTest {
         foo1.setFoo2(123.13);
         foo1.setFoo3(new Date());
         foo1.setFoo4(1);
+        Date now = new Date();
+        foo1.setFooDate(now);
         Assert.assertEquals(true, templateUtils.insert(foo1, true));
         Foo foo1Data = templateUtils.queryForObject("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
         Assert.assertNotEquals(foo1Data, null);
 
         String cnt = templateUtils.queryForObject("select count(1) from t_foo ", null, String.class);
         Assert.assertNotEquals(cnt, null);
+
+        //date test
+        String nullTime = "00:00:00";
+        String hhmmss = "HH:mm:ss";
+        String nowH = DateFormatUtils.format(now, hhmmss);
+        String dataH = DateFormatUtils.format(foo1Data.getFooDate(), hhmmss);
+        if (!StringUtils.equals(nowH, nullTime)) {
+            Assert.assertNotEquals(dataH, nullTime);
+        }
+
     }
 
     @Test

@@ -86,7 +86,7 @@ public class MapperHelper {
             } else if (type == String.class) {
                 return isEmptyLabel ? rs.getString(columnIndex) : rs.getString(label);
             } else if (type == Date.class) {
-                return isEmptyLabel ? rs.getDate(columnIndex) : rs.getDate(label);
+                return isEmptyLabel ? rs.getTimestamp(columnIndex) : rs.getTimestamp(label);
             } else if (type == boolean.class || type == Boolean.class) {
                 return isEmptyLabel ? rs.getBoolean(columnIndex) : rs.getBoolean(label);
             } else if (type == byte.class || type == Byte.class) {

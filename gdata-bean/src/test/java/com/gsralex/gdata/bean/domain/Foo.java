@@ -35,6 +35,9 @@ public class Foo {
     @Column(name = "foo_5")
     private boolean foo5;
 
+    @Column(name = "foo_date")
+    private Date fooDate;
+
 
     public int getId() {
         return id;
@@ -90,5 +93,13 @@ public class Foo {
 
     public void setFoo5(boolean foo5) {
         this.foo5 = foo5;
+    }
+
+    public Date getFooDate() {
+        return fooDate;
+    }
+
+    public void setFooDate(Date fooDate) {
+        this.fooDate = fooDate;
     }
 }
