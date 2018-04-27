@@ -17,6 +17,8 @@ public class FooSource {
         foo1.setFoo3(new Date());
         foo1.setFoo4(1);
         foo1.setFooImg("123123");
+        foo1.setFoo5(true);
+        foo1.setFoo6(true);
         return foo1;
     }
 

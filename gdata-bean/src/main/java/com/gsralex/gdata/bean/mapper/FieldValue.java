@@ -2,6 +2,7 @@ package com.gsralex.gdata.bean.mapper;
 
 
 import com.gsralex.gdata.bean.exception.DataException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -14,6 +15,9 @@ import java.util.Map;
  * @version 2018/2/22
  */
 public class FieldValue {
+
+    private static final String TYPENAME_BOOLEAN = "boolean";
+    private static final String TYPENAME_JAVALANGBOOLEAN = "java.lang.Boolean";
 
     private Object instance;
     private Class type;
@@ -50,22 +54,32 @@ public class FieldValue {
             String typeName = fieldType.getTypeName();
             Method method;
             switch (typeName) {
-                case "boolean": {
-                    method = this.getMethod(getIsMethodName(fieldName), null);
+                case TYPENAME_BOOLEAN: {
+                    method = this.getMethod(getIsMethodName(fieldName), null);//1
                     if (method == null) {
-                        method = this.getMethod(getGetMethodName(fieldName), null);
-                        if (method == null) {
-                            throw new NoSuchMethodException("getMethod:" + this.type.getName() + "." + fieldName);
-                        }
+                        method = this.getMethod(getGetMethodName(fieldName), null);//2
+                    }
+                    if (method == null) {
+                        method = this.getMethod(getGetNoIsMethodName(fieldName), null);//3
+                    }
+                    break;
+                }
+                case TYPENAME_JAVALANGBOOLEAN: {
+                    method = this.getMethod(getGetNoIsMethodName(fieldName), null);//3
+                    if (method == null) {
+                        method = this.getMethod(getGetMethodName(fieldName), null);//2
+                    }
+                    if (method == null) {
+                        method = this.getMethod(getIsMethodName(fieldName), null);//1
                     }
                     break;
                 }
                 default: {
                     method = this.getMethod(getGetMethodName(fieldName), null);
-                    if (method == null) {
-                        throw new NoSuchMethodException("getMethod:" + this.type.getName() + "." + fieldName);
-                    }
                 }
+            }
+            if (method == null) {
+                throw new NoSuchMethodException("getMethod:" + this.type.getName() + "." + fieldName);
             }
             return (T) method.invoke(instance);
         } catch (Throwable e) {
@@ -77,7 +91,22 @@ public class FieldValue {
     public void setValue(Class fieldType, String fieldName, Object value) {
         try {
             String setMethodName = getSetMethodName(fieldName);
-            Method method = this.getMethod(setMethodName, fieldType);
+            String typeName = fieldType.getTypeName();
+            Method method;
+            switch (typeName) {
+                case TYPENAME_BOOLEAN:
+                case TYPENAME_JAVALANGBOOLEAN: {
+                    method = this.getMethod(getSetNoIsMethodName(fieldName), fieldType);
+                    if (method == null) {
+                        method = this.getMethod(setMethodName, fieldType);
+                    }
+                    break;
+                }
+                default: {
+                    method = this.getMethod(setMethodName, fieldType);
+                    break;
+                }
+            }
             if (method == null) {
                 throw new NoSuchMethodException("setMethod:" + this.type.getName() + "." + fieldName);
             }
@@ -109,18 +138,29 @@ public class FieldValue {
 
 
     private static String getGetMethodName(String fieldName) {
-        return "get" + getPostMethodName(fieldName);
+        return "get" + getInitCapsMethodName(fieldName);
     }
 
     private static String getIsMethodName(String fieldName) {
-        return "is" + getPostMethodName(fieldName);
+        return "is" + getInitCapsMethodName(fieldName);
     }
+
+    private static String getGetNoIsMethodName(String fieldName) {
+        String noIsMethodName = StringUtils.removeStart(fieldName, "is");
+        return "get" + getInitCapsMethodName(noIsMethodName);
+    }
+
 
     private static String getSetMethodName(String fieldName) {
-        return "set" + getPostMethodName(fieldName);
+        return "set" + getInitCapsMethodName(fieldName);
     }
 
-    private static String getPostMethodName(String fieldName) {
+    private static String getSetNoIsMethodName(String fieldName) {
+        String noIsMethodName = StringUtils.removeStart(fieldName, "is");
+        return "set" + getInitCapsMethodName(noIsMethodName);
+    }
+
+    private static String getInitCapsMethodName(String fieldName) {
         return fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
     }
 }

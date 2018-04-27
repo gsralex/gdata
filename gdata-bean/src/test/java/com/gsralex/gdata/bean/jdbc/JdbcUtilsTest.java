@@ -93,13 +93,16 @@ public class JdbcUtilsTest {
         Foo foo1 = FooSource.getEntity();
         Date now = new Date();
         foo1.setFooDate(now);
+        foo1.setFoo5(true);
+        foo1.setFoo6(true);
         Assert.assertEquals(true, jdbcUtils.insert(foo1, true));
 
 
         Foo fooData = jdbcUtils.queryForObject("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
         Integer cnt = jdbcUtils.queryForObject("select count(1) from t_foo", null, Integer.class);
         Assert.assertNotEquals(cnt, null);
-
+        Assert.assertEquals(fooData.isFoo5(),true);
+        Assert.assertEquals(fooData.getFoo6(),true);
         //date test
         String nullTime = "00:00:00";
         String hhmmss = "HH:mm:ss";

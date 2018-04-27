@@ -39,6 +39,10 @@ public class Foo {
     private Date fooDate;
 
 
+    @Column(name = "foo_6")
+    private Boolean isFoo6;
+
+
     public int getId() {
         return id;
     }
@@ -101,5 +105,21 @@ public class Foo {
 
     public void setFooDate(Date fooDate) {
         this.fooDate = fooDate;
+    }
+
+    public String getFooimg() {
+        return fooimg;
+    }
+
+    public void setFooimg(String fooimg) {
+        this.fooimg = fooimg;
+    }
+
+    public Boolean getFoo6() {
+        return isFoo6;
+    }
+
+    public void setFoo6(Boolean foo6) {
+        isFoo6 = foo6;
     }
 }
