@@ -84,6 +84,8 @@ public class SqlInsertStatement implements SqlStatement {
                             value = longValue.floatValue();
                         } else if (column.getType() == Byte.class || column.getType() == byte.class) {
                             value = longValue.byteValue();
+                        } else if (column.getType() == Long.class || column.getType() == long.class) {
+                            value = longValue;
                         }
                         fieldValue.setValue(column.getType(), column.getName(), value);
                     }
