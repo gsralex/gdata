@@ -1,6 +1,8 @@
 package com.gsralex.gdata.bean.sqlstatement;
 
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author gsralex
  * @version 2018/4/2
@@ -8,7 +10,7 @@ package com.gsralex.gdata.bean.sqlstatement;
 public class SqlAlias {
 
     private static final String DB_MYSQL = "mysql";
-    private static final String DB_SQLSERVER = "sqlserver";
+    private static final String DB_SQLSERVER = "sql server";
     private static final String DB_ORACLE = "oracle";
 
     private static final String ALIAS_MYSQL = "`%s`";
