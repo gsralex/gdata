@@ -11,7 +11,7 @@ import javax.sql.DataSource;
 public class DataSourceConfg {
 
     private static final String DB_DRIVER = "com.mysql.jdbc.Driver";
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/glow?useSSL=false&useServerPrepStmts=false&rewriteBatchedStatements=true";
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/gflow?useSSL=false&useServerPrepStmts=false&rewriteBatchedStatements=true";
     private static final String DB_USERNAME = "root";
     private static final String DB_PASSWORD = "123456";
 

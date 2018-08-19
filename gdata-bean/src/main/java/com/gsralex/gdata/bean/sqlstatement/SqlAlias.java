@@ -7,20 +7,28 @@ package com.gsralex.gdata.bean.sqlstatement;
  */
 public class SqlAlias {
 
+    private static final String DB_MYSQL = "mysql";
+    private static final String DB_SQLSERVER = "sqlserver";
+    private static final String DB_ORACLE = "oracle";
+
     private static final String ALIAS_MYSQL = "`%s`";
     private static final String ALIAS_SQLSERVER = "[%s]";
     private static final String ALIAS_ORACLE = "\"%s\"";
     private static final String ALIAS_DEFAULT = "%s";
 
     public static String getAliasFormat(String databaseProductName) {
+        if (databaseProductName == null) {
+            databaseProductName = "";
+        }
+        databaseProductName = databaseProductName.toLowerCase().trim();
         switch (databaseProductName) {
-            case "MySQL": {
+            case DB_MYSQL: {
                 return ALIAS_MYSQL;
             }
-            case "SQL Server": {
+            case DB_SQLSERVER: {
                 return ALIAS_SQLSERVER;
             }
-            case "Oracle": {
+            case DB_ORACLE: {
                 return ALIAS_ORACLE;
             }
             default: {
