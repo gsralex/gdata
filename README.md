@@ -9,7 +9,7 @@ Maven
  ``` java
  <dependency>
       <groupId>com.gsralex</groupId>
-      <artifactId>gdata</artifactId>
+      <artifactId>gdata-bean</artifactId>
       <version>${lastest.version}</version>
   </dependency>
 ```
