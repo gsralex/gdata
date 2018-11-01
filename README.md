@@ -61,6 +61,31 @@ Foo data=jdbcUtils.queryForObject("select * from t_foo where id=?",new Object[]{
 
 List<Foo> list=jdbcUtils.queryForList("select * from t_foo",null,Foo.class);
 
+//支持Vo
+
+public class Vo {
+
+    @Column(name = "foo_1")
+    private String foo1;//db field foo_1
+
+    @Column(name = "foo_2")
+    private Double foo2;//db field foo_2
+
+    @Column(name = "foo_3")
+    private Date foo3;//db field foo_3
+
+    @Column(name = "foo_4")
+    private Integer foo4;//db field foo_4
+   
+    private Integer foo5;//db field foo5
+	
+    private Integer nodb_foo6;//not a db field 不会赋值
+    
+    private Double nodb_foo7;//not a db field 不会赋值
+}
+
+List<Vo> list=jdbcUtils.queryForList("select * from vo where id=?",new Object[]{1},Vo.class);
+
 //queryForObject 支持简单类型
 Integer cnt=jdbcUtils.queryForObject("select count(1) from t_foo",null,Integer.class); 
 
