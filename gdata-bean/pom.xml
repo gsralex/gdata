@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.gsralex</groupId>
         <artifactId>gdata</artifactId>
-        <version>1.075</version>
+        <version>1.076</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -26,11 +26,6 @@
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
         </dependency>
 
         <dependency>

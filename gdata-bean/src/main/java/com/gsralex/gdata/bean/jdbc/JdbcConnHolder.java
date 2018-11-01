@@ -1,7 +1,6 @@
 package com.gsralex.gdata.bean.jdbc;
 
 import com.gsralex.gdata.bean.exception.DataException;
-import org.springframework.core.NamedThreadLocal;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -13,7 +12,7 @@ import java.sql.SQLException;
  */
 public class JdbcConnHolder {
 
-    private static final ThreadLocal<Connection> connPool = new NamedThreadLocal<>("CONN");
+    private static final ThreadLocal<Connection> connPool = new ThreadLocal<>();
 
     public static Connection getConnection(DataSource dataSource) {
         Connection conn = connPool.get();
