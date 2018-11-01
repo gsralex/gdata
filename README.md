@@ -53,8 +53,16 @@ Foo foo=new Foo();
 jdbcUtils.insert(foo,true);
 Assert.assertNotEquals(0, foo.getId()); //ok
 
+//也支持sql insert
+String sql="insert into t_foo(foo_1,foo_2,foo_3) values(?,?,?)";
+jdbcUtils.executeUpdate(sql,new Object[]{foo.getFoo1(),foo.getFoo2(),foo.getFoo3());
+
 foo.setFoo4(123123);
 jdbcUtils.update(foo);
+
+//也可以这样update
+String sql="update t_foo set foo4=? where id=?";
+jdbcUtils.executeUpdate(sql,new Object[]{foo.getFoo4(),foo.getId()});
   
 //queryForObject 支持复杂类型
 Foo data=jdbcUtils.queryForObject("select * from t_foo where id=?",new Object[]{1},Foo.class); 
@@ -91,6 +99,7 @@ Integer cnt=jdbcUtils.queryForObject("select count(1) from t_foo",null,Integer.c
 
 
 boolean ok=jdbcUtils.delete(foo);
+
 
  ```
  
