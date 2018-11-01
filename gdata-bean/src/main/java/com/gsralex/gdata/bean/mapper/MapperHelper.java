@@ -75,29 +75,35 @@ public class MapperHelper {
 
     public Object getRsValue(ResultSet rs, int columnIndex, String label, Class type) {
         boolean isEmptyLabel = StringUtils.isEmpty(label);
+        Object result;
         try {
             if (type == int.class || type == Integer.class) {
-                return isEmptyLabel ? rs.getInt(columnIndex) : rs.getInt(label);
+                result = isEmptyLabel ? rs.getInt(columnIndex) : rs.getInt(label);
             } else if (type == float.class || type == Float.class) {
-                return isEmptyLabel ? rs.getFloat(columnIndex) : rs.getFloat(label);
+                result = isEmptyLabel ? rs.getFloat(columnIndex) : rs.getFloat(label);
             } else if (type == double.class || type == Double.class) {
-                return isEmptyLabel ? rs.getDouble(columnIndex) : rs.getDouble(label);
+                result = isEmptyLabel ? rs.getDouble(columnIndex) : rs.getDouble(label);
             } else if (type == long.class || type == Long.class) {
-                return isEmptyLabel ? rs.getLong(columnIndex) : rs.getLong(label);
+                result = isEmptyLabel ? rs.getLong(columnIndex) : rs.getLong(label);
             } else if (type == String.class) {
-                return isEmptyLabel ? rs.getString(columnIndex) : rs.getString(label);
+                result = isEmptyLabel ? rs.getString(columnIndex) : rs.getString(label);
             } else if (type == Date.class) {
-                return isEmptyLabel ? rs.getTimestamp(columnIndex) : rs.getTimestamp(label);
+                result = isEmptyLabel ? rs.getTimestamp(columnIndex) : rs.getTimestamp(label);
             } else if (type == boolean.class || type == Boolean.class) {
-                return isEmptyLabel ? rs.getBoolean(columnIndex) : rs.getBoolean(label);
+                result = isEmptyLabel ? rs.getBoolean(columnIndex) : rs.getBoolean(label);
             } else if (type == byte.class || type == Byte.class) {
-                return isEmptyLabel ? rs.getByte(columnIndex) : rs.getByte(label);
+                result = isEmptyLabel ? rs.getByte(columnIndex) : rs.getByte(label);
             } else if (type == short.class || type == Short.class) {
-                return isEmptyLabel ? rs.getShort(columnIndex) : rs.getShort(label);
+                result = isEmptyLabel ? rs.getShort(columnIndex) : rs.getShort(label);
             } else if (type == BigDecimal.class) {
-                return isEmptyLabel ? rs.getBigDecimal(columnIndex) : rs.getBigDecimal(label);
+                result = isEmptyLabel ? rs.getBigDecimal(columnIndex) : rs.getBigDecimal(label);
             } else {
-                return isEmptyLabel ? rs.getObject(columnIndex) : rs.getObject(label);
+                result = isEmptyLabel ? rs.getObject(columnIndex) : rs.getObject(label);
+            }
+            if (rs.wasNull()) {
+                return null;
+            } else {
+                return result;
             }
         } catch (SQLException e) {
             e.printStackTrace();

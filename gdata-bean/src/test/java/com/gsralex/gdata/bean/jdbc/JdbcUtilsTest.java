@@ -35,8 +35,12 @@ public class JdbcUtilsTest {
         Assert.assertEquals(true, jdbcUtils.insert(FooSource.getEntity()));
 
         Foo foo = FooSource.getEntity();
+        foo.setFoo6(null);
         jdbcUtils.insert(foo, true);
         Assert.assertNotEquals(0, foo.getId());
+        String sql="select * from t_foo where id=?";
+        Foo fooData= jdbcUtils.queryForObject(sql,new Object[]{foo.getId()},Foo.class);
+        Assert.assertEquals(fooData.getFoo6(), null);
 
     }
 
