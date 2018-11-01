@@ -1,10 +1,12 @@
 package com.gsralex.gdata.bean.jdbctemplate;
 
 import com.gsralex.gdata.bean.mapper.MapperHelper;
+import com.gsralex.gdata.bean.sqlstatement.JdbcHelper;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Set;
 
 /**
  * @author gsralex
@@ -22,6 +24,7 @@ public class BeanRowMapper<T> implements RowMapper<T> {
 
     @Override
     public T mapRow(ResultSet resultSet, int i) throws SQLException {
-        return mapperHelper.mapperEntity(resultSet, type);
+        Set<String> columnSet = JdbcHelper.getColumnLabelSet(resultSet.getMetaData());
+        return mapperHelper.mapperEntity(resultSet, columnSet, type);
     }
 }

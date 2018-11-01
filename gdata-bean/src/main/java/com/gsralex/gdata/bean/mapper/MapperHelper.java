@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author gsralex
@@ -15,11 +16,11 @@ import java.util.Map;
 public class MapperHelper {
 
 
-    public <T> T mapperEntity(ResultSet resultSet, Class<T> type) {
+    public <T> T mapperEntity(ResultSet resultSet, Set<String> columnSet, Class<T> type) {
         if (isSimple(type)) {
             return mapperSimpleEntity(resultSet, type);
         } else {
-            return mapperComplexEntity(resultSet, type);
+            return mapperComplexEntity(resultSet, columnSet, type);
         }
     }
 
@@ -33,13 +34,20 @@ public class MapperHelper {
     }
 
 
-    private <T> T mapperComplexEntity(ResultSet resultSet, Class<T> type) {
+    private <T> T mapperComplexEntity(ResultSet resultSet, Set<String> columnSet, Class<T> type) {
         T instance = null;
         try {
             instance = type.newInstance();
             Mapper mapper = MapperHolder.getMapperCache(type);
             FieldValue fieldValue = new FieldValue(instance);
-            mapper(resultSet, mapper, fieldValue);
+            for (Map.Entry<String, FieldColumn> item : mapper.getMapper().entrySet()) {
+                String label = StringUtils.lowerCase(item.getValue().getLabel());
+                if (columnSet.contains(label)) {
+                    Class fieldType = item.getValue().getType();
+                    Object object = getRsValue(resultSet, 0, label, fieldType);
+                    setRsValue(object, item.getValue(), fieldValue);
+                }
+            }
             return (T) fieldValue.getInstance();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -47,13 +55,6 @@ public class MapperHelper {
             e.printStackTrace();
         }
         return instance;
-    }
-
-
-    public void mapper(ResultSet rs, Mapper mapper, FieldValue fieldValue) {
-        for (Map.Entry<String, FieldColumn> item : mapper.getMapper().entrySet()) {
-            setRsValue(rs, item.getValue(), fieldValue);
-        }
     }
 
     public boolean isSimple(Class type) {
@@ -96,7 +97,7 @@ public class MapperHelper {
             } else if (type == BigDecimal.class) {
                 return isEmptyLabel ? rs.getBigDecimal(columnIndex) : rs.getBigDecimal(label);
             } else {
-                return rs.getObject(columnIndex);
+                return isEmptyLabel ? rs.getObject(columnIndex) : rs.getObject(label);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -105,12 +106,10 @@ public class MapperHelper {
     }
 
 
-    public void setRsValue(ResultSet rs, FieldColumn column, FieldValue fieldValue) {
+    public void setRsValue(Object value, FieldColumn column, FieldValue fieldValue) {
         try {
             String fieldName = column.getName();
-            String label = column.getLabel();
             Class type = column.getType();
-            Object value = getRsValue(rs, 0, label, type);
             fieldValue.setValue(type, fieldName, value);
         } catch (Throwable e) {
         }

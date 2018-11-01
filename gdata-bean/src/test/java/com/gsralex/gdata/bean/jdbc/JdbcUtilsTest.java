@@ -3,6 +3,7 @@ package com.gsralex.gdata.bean.jdbc;
 import com.gsralex.gdata.bean.DataSourceConfg;
 import com.gsralex.gdata.bean.domain.FooSource;
 import com.gsralex.gdata.bean.domain.Foo;
+import com.gsralex.gdata.bean.domain.FooVo;
 import com.gsralex.gdata.bean.placeholder.BeanSource;
 import com.gsralex.gdata.bean.result.DataSet;
 import org.apache.commons.lang3.StringUtils;
@@ -101,8 +102,8 @@ public class JdbcUtilsTest {
         Foo fooData = jdbcUtils.queryForObject("select * from t_foo where id=?", new Object[]{foo1.getId()}, Foo.class);
         Integer cnt = jdbcUtils.queryForObject("select count(1) from t_foo", null, Integer.class);
         Assert.assertNotEquals(cnt, null);
-        Assert.assertEquals(fooData.isFoo5(),true);
-        Assert.assertEquals(fooData.getFoo6(),true);
+        Assert.assertEquals(fooData.isFoo5(), true);
+        Assert.assertEquals(fooData.getFoo6(), true);
         //date test
         String nullTime = "00:00:00";
         String hhmmss = "HH:mm:ss";
@@ -217,6 +218,18 @@ public class JdbcUtilsTest {
         jdbcUtils.executeUpdateP("update t_foo set foo_1=:foo1 where id=:id", new BeanSource(foo));
         Foo data1 = getData(foo.getId());
         Assert.assertEquals(data1.getFoo1(), "t_1234");
+    }
+
+    @Test
+    public void queryVo() {
+        String sql = "select * from t_foo";
+        Foo foo = FooSource.getEntity();
+        jdbcUtils.insert(foo, true);
+        List<FooVo> list = jdbcUtils.queryForList(sql, null, FooVo.class);
+        Assert.assertNotEquals(list.size(), 0);
+        Assert.assertEquals(list.get(0).getFoo_7(), null);
+        Assert.assertNotEquals(list.get(0).getId(), null);
+        Assert.assertNotEquals(list.get(0).getFoo_1(), null);
     }
 
 }

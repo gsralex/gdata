@@ -21,6 +21,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author gsralex
@@ -217,8 +218,9 @@ public class JdbcUtils {
             @Override
             public void mapper(ResultSet rs) {
                 try {
+                    Set<String> columnSet = JdbcHelper.getColumnLabelSet(rs.getMetaData());
                     while (rs.next()) {
-                        list.add(mapperHelper.mapperEntity(rs, type));
+                        list.add(mapperHelper.mapperEntity(rs, columnSet, type));
                     }
                 } catch (SQLException e) {
                 }

@@ -1,9 +1,13 @@
 package com.gsralex.gdata.bean.sqlstatement;
 
+import org.apache.commons.lang3.StringUtils;
+
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author gsralex
@@ -11,12 +15,22 @@ import java.util.List;
  */
 public class JdbcHelper {
 
+    public static Set<String> getColumnLabelSet(ResultSetMetaData metaData) throws SQLException {
+        Set<String> labelSet = new HashSet<>();
+        String[] labels = getColumnLabels(metaData);
+        for (String label : labels) {
+            labelSet.add(label);
+        }
+        return labelSet;
+    }
+
     public static String[] getColumnLabels(ResultSetMetaData metaData) throws SQLException {
         int columnCount = metaData.getColumnCount();
 
         List<String> labelList = new ArrayList<>();
         for (int i = 0; i < columnCount; i++) {
-            labelList.add(metaData.getColumnLabel(i + 1));
+            String label = StringUtils.lowerCase(metaData.getColumnLabel(i + 1));
+            labelList.add(label);
         }
         String[] labels = new String[labelList.size()];
         labelList.toArray(labels);
