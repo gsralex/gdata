@@ -6,7 +6,7 @@
     <groupId>com.gsralex</groupId>
     <artifactId>gdata</artifactId>
     <packaging>pom</packaging>
-    <version>1.073</version>
+    <version>1.075</version>
     <modules>
         <module>gdata-bean</module>
     </modules>
