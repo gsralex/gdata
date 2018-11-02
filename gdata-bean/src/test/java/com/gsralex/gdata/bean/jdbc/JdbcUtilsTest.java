@@ -4,15 +4,16 @@ import com.gsralex.gdata.bean.DataSourceConfg;
 import com.gsralex.gdata.bean.domain.FooSource;
 import com.gsralex.gdata.bean.domain.Foo;
 import com.gsralex.gdata.bean.domain.FooVo;
+import com.gsralex.gdata.bean.exception.DataException;
 import com.gsralex.gdata.bean.placeholder.BeanSource;
 import com.gsralex.gdata.bean.result.DataSet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -38,8 +39,8 @@ public class JdbcUtilsTest {
         foo.setFoo6(null);
         jdbcUtils.insert(foo, true);
         Assert.assertNotEquals(0, foo.getId());
-        String sql="select * from t_foo where id=?";
-        Foo fooData= jdbcUtils.queryForObject(sql,new Object[]{foo.getId()},Foo.class);
+        String sql = "select * from t_foo where id=?";
+        Foo fooData = jdbcUtils.queryForObject(sql, new Object[]{foo.getId()}, Foo.class);
         Assert.assertEquals(fooData.getFoo6(), null);
 
     }
@@ -189,19 +190,23 @@ public class JdbcUtilsTest {
 
     @Test
     public void transaction() {
-        Foo foo = FooSource.getEntity();
-        jdbcUtils.setAutoCommit(false);
-        jdbcUtils.insert(foo, true);
-        Foo data = jdbcUtils.queryForObject("select * from t_foo where id=? ", new Object[]{foo.getId()}, Foo.class);
-        Foo foo1 = FooSource.getEntity();
-        jdbcUtils.insert(foo1, true);
-        Assert.assertNotEquals(foo1.getId(), 0);
-        jdbcUtils.rollback();
-        jdbcUtils.setAutoCommit(true);
-        Foo foo2 = FooSource.getEntity();
-        jdbcUtils.insert(foo2, true);
-        Assert.assertEquals(foo2.getId(), foo1.getId() + 1);
-        Assert.assertNotEquals(getData(foo2.getId()), null);
+        try {
+            Foo foo = FooSource.getEntity();
+            jdbcUtils.setAutoCommit(false);
+            jdbcUtils.insert(foo, true);
+            Foo data = jdbcUtils.queryForObject("select * from t_foo where id=? ", new Object[]{foo.getId()}, Foo.class);
+            Foo foo1 = FooSource.getEntity();
+            jdbcUtils.insert(foo1, true);
+            Assert.assertNotEquals(foo1.getId(), 0);
+            jdbcUtils.rollback();
+            jdbcUtils.setAutoCommit(true);
+            Foo foo2 = FooSource.getEntity();
+            jdbcUtils.insert(foo2, true);
+            Assert.assertEquals(foo2.getId(), foo1.getId() + 1);
+            Assert.assertNotEquals(getData(foo2.getId()), null);
+        } catch (SQLException e) {
+            throw new DataException("transaction", e);
+        }
     }
 
     public Foo getData(long id) {
@@ -215,11 +220,11 @@ public class JdbcUtilsTest {
         Map<String, Object> map = new HashMap<>();
         map.put("Foo1", "t_123");
         map.put("Id", foo.getId());
-        jdbcUtils.executeUpdateP("update t_foo set foo_1=:foo1 where id=:id", map);
+        jdbcUtils.executeUpdatePh("update t_foo set foo_1=:foo1 where id=:id", map);
         Foo data = getData(foo.getId());
         Assert.assertEquals(data.getFoo1(), "t_123");
         foo.setFoo1("t_1234");
-        jdbcUtils.executeUpdateP("update t_foo set foo_1=:foo1 where id=:id", new BeanSource(foo));
+        jdbcUtils.executeUpdatePh("update t_foo set foo_1=:foo1 where id=:id", new BeanSource(foo));
         Foo data1 = getData(foo.getId());
         Assert.assertEquals(data1.getFoo1(), "t_1234");
     }

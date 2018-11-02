@@ -9,14 +9,11 @@ import java.sql.SQLException;
  */
 public class ResultUtils {
 
-    public static void closeResultSet(ResultSet resultSet) {
-        try {
-            if (resultSet != null) {
-                if (!resultSet.isClosed()) {
-                    resultSet.close();
-                }
+    public static void closeResultSet(ResultSet resultSet) throws SQLException {
+        if (resultSet != null) {
+            if (!resultSet.isClosed()) {
+                resultSet.close();
             }
-        } catch (SQLException e) {
         }
     }
 }

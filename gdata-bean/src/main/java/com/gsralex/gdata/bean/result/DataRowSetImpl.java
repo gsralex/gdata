@@ -26,20 +26,12 @@ public class DataRowSetImpl implements DataRowSet {
 
     @Override
     public Object getObject(int column) {
-        try {
-            return map.get(labels[column - 1]);
-        } catch (Throwable e) {
-            throw new DataException("getObject", e);
-        }
+        return map.get(labels[column - 1]);
     }
 
     @Override
     public Object getObject(String label) {
-        try {
-            return map.get(label);
-        } catch (Throwable e) {
-            throw new DataException("getObject", e);
-        }
+        return map.get(label);
     }
 
     @Override

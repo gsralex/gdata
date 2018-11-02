@@ -2,6 +2,7 @@ package com.gsralex.gdata.bean.mapper;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,7 +17,7 @@ import java.util.Set;
 public class MapperHelper {
 
 
-    public <T> T mapperEntity(ResultSet resultSet, Set<String> columnSet, Class<T> type) {
+    public <T> T mapperEntity(ResultSet resultSet, Set<String> columnSet, Class<T> type) throws IllegalAccessException, SQLException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         if (isSimple(type)) {
             return mapperSimpleEntity(resultSet, type);
         } else {
@@ -24,37 +25,26 @@ public class MapperHelper {
         }
     }
 
-    private <T> T mapperSimpleEntity(ResultSet resultSet, Class<T> type) {
-        try {
-            return (T) getRsValue(resultSet, 1, null, type);
-        } catch (Throwable e) {
-            System.out.println(e.getMessage());
-        }
-        return null;
+    private <T> T mapperSimpleEntity(ResultSet resultSet, Class<T> type) throws SQLException {
+        return (T) getRsValue(resultSet, 1, null, type);
     }
 
 
-    private <T> T mapperComplexEntity(ResultSet resultSet, Set<String> columnSet, Class<T> type) {
-        T instance = null;
-        try {
-            instance = type.newInstance();
-            Mapper mapper = MapperHolder.getMapperCache(type);
-            FieldValue fieldValue = new FieldValue(instance);
-            for (Map.Entry<String, FieldColumn> item : mapper.getMapper().entrySet()) {
-                String label = StringUtils.lowerCase(item.getValue().getLabel());
-                if (columnSet.contains(label)) {
-                    Class fieldType = item.getValue().getType();
-                    Object object = getRsValue(resultSet, 0, label, fieldType);
-                    setRsValue(object, item.getValue(), fieldValue);
-                }
+    private <T> T mapperComplexEntity(ResultSet resultSet, Set<String> columnSet, Class<T> type) throws IllegalAccessException, InstantiationException, SQLException, NoSuchMethodException, InvocationTargetException {
+        T instance;
+        instance = type.newInstance();
+        Mapper mapper = MapperHolder.getMapperCache(type);
+        FieldValue fieldValue = new FieldValue(instance);
+        for (Map.Entry<String, FieldColumn> item : mapper.getMapper().entrySet()) {
+            String label = StringUtils.lowerCase(item.getValue().getLabel());
+            if (columnSet.contains(label)) {
+                Class fieldType = item.getValue().getType();
+                Object object = getRsValue(resultSet, 0, label, fieldType);
+                setRsValue(object, item.getValue(), fieldValue);
             }
-            return (T) fieldValue.getInstance();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
         }
-        return instance;
+        return (T) fieldValue.getInstance();
+
     }
 
     public boolean isSimple(Class type) {
@@ -73,51 +63,43 @@ public class MapperHelper {
         return false;
     }
 
-    public Object getRsValue(ResultSet rs, int columnIndex, String label, Class type) {
+    public Object getRsValue(ResultSet rs, int columnIndex, String label, Class type) throws SQLException {
         boolean isEmptyLabel = StringUtils.isEmpty(label);
         Object result;
-        try {
-            if (type == int.class || type == Integer.class) {
-                result = isEmptyLabel ? rs.getInt(columnIndex) : rs.getInt(label);
-            } else if (type == float.class || type == Float.class) {
-                result = isEmptyLabel ? rs.getFloat(columnIndex) : rs.getFloat(label);
-            } else if (type == double.class || type == Double.class) {
-                result = isEmptyLabel ? rs.getDouble(columnIndex) : rs.getDouble(label);
-            } else if (type == long.class || type == Long.class) {
-                result = isEmptyLabel ? rs.getLong(columnIndex) : rs.getLong(label);
-            } else if (type == String.class) {
-                result = isEmptyLabel ? rs.getString(columnIndex) : rs.getString(label);
-            } else if (type == Date.class) {
-                result = isEmptyLabel ? rs.getTimestamp(columnIndex) : rs.getTimestamp(label);
-            } else if (type == boolean.class || type == Boolean.class) {
-                result = isEmptyLabel ? rs.getBoolean(columnIndex) : rs.getBoolean(label);
-            } else if (type == byte.class || type == Byte.class) {
-                result = isEmptyLabel ? rs.getByte(columnIndex) : rs.getByte(label);
-            } else if (type == short.class || type == Short.class) {
-                result = isEmptyLabel ? rs.getShort(columnIndex) : rs.getShort(label);
-            } else if (type == BigDecimal.class) {
-                result = isEmptyLabel ? rs.getBigDecimal(columnIndex) : rs.getBigDecimal(label);
-            } else {
-                result = isEmptyLabel ? rs.getObject(columnIndex) : rs.getObject(label);
-            }
-            if (rs.wasNull()) {
-                return null;
-            } else {
-                return result;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (type == int.class || type == Integer.class) {
+            result = isEmptyLabel ? rs.getInt(columnIndex) : rs.getInt(label);
+        } else if (type == float.class || type == Float.class) {
+            result = isEmptyLabel ? rs.getFloat(columnIndex) : rs.getFloat(label);
+        } else if (type == double.class || type == Double.class) {
+            result = isEmptyLabel ? rs.getDouble(columnIndex) : rs.getDouble(label);
+        } else if (type == long.class || type == Long.class) {
+            result = isEmptyLabel ? rs.getLong(columnIndex) : rs.getLong(label);
+        } else if (type == String.class) {
+            result = isEmptyLabel ? rs.getString(columnIndex) : rs.getString(label);
+        } else if (type == Date.class) {
+            result = isEmptyLabel ? rs.getTimestamp(columnIndex) : rs.getTimestamp(label);
+        } else if (type == boolean.class || type == Boolean.class) {
+            result = isEmptyLabel ? rs.getBoolean(columnIndex) : rs.getBoolean(label);
+        } else if (type == byte.class || type == Byte.class) {
+            result = isEmptyLabel ? rs.getByte(columnIndex) : rs.getByte(label);
+        } else if (type == short.class || type == Short.class) {
+            result = isEmptyLabel ? rs.getShort(columnIndex) : rs.getShort(label);
+        } else if (type == BigDecimal.class) {
+            result = isEmptyLabel ? rs.getBigDecimal(columnIndex) : rs.getBigDecimal(label);
+        } else {
+            result = isEmptyLabel ? rs.getObject(columnIndex) : rs.getObject(label);
         }
-        return null;
+        if (rs.wasNull()) {
+            return null;
+        } else {
+            return result;
+        }
     }
 
 
-    public void setRsValue(Object value, FieldColumn column, FieldValue fieldValue) {
-        try {
-            String fieldName = column.getName();
-            Class type = column.getType();
-            fieldValue.setValue(type, fieldName, value);
-        } catch (Throwable e) {
-        }
+    public void setRsValue(Object value, FieldColumn column, FieldValue fieldValue) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        String fieldName = column.getName();
+        Class type = column.getType();
+        fieldValue.setValue(type, fieldName, value);
     }
 }

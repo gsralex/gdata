@@ -4,6 +4,7 @@ package com.gsralex.gdata.bean.mapper;
 import com.gsralex.gdata.bean.exception.DataException;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,7 +83,7 @@ public class FieldValue {
                 throw new NoSuchMethodException("getMethod:" + this.type.getName() + "." + fieldName);
             }
             return (T) method.invoke(instance);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             throw new DataException("getValue", e);
         }
     }
@@ -111,7 +112,7 @@ public class FieldValue {
                 throw new NoSuchMethodException("setMethod:" + this.type.getName() + "." + fieldName);
             }
             method.invoke(instance, value);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             throw new DataException("setValue", e);
         }
     }

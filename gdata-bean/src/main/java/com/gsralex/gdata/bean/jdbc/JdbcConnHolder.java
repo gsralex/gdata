@@ -14,28 +14,20 @@ public class JdbcConnHolder {
 
     private static final ThreadLocal<Connection> connPool = new ThreadLocal<>();
 
-    public static Connection getConnection(DataSource dataSource) {
+    public static Connection getConnection(DataSource dataSource) throws SQLException {
         Connection conn = connPool.get();
         if (conn == null) {
-            try {
-                conn = dataSource.getConnection();
-                connPool.set(conn);
-            } catch (SQLException e) {
-                throw new DataException("getConnection", e);
-            }
+            conn = dataSource.getConnection();
+            connPool.set(conn);
         }
         return conn;
     }
 
-    public static void closeConnection() {
+    public static void closeConnection() throws SQLException {
         Connection conn = connPool.get();
-        try {
-            if (conn != null && !conn.isClosed()) {
-                conn.close();
-                connPool.set(null);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (conn != null && !conn.isClosed()) {
+            conn.close();
+            connPool.set(null);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.gsralex.gdata.bean.sqlstatement;
 
+import com.gsralex.gdata.bean.exception.DataException;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.sql.DataSource;
@@ -53,7 +54,7 @@ public class JdbcHelper {
         try {
             return dataSource.getConnection().getMetaData().getDatabaseProductName();
         } catch (SQLException e) {
-            return "";
+            throw new DataException("getProductName", e);
         }
     }
 

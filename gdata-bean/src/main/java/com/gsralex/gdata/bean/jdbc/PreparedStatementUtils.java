@@ -9,26 +9,18 @@ import java.sql.SQLException;
  */
 public class PreparedStatementUtils {
 
-    public static void clearStatement(PreparedStatement ps) {
-        try {
-            if (ps != null) {
-                ps.clearParameters();
-                ps.close();
-            }
-        } catch (SQLException e) {
-
+    public static void clearStatement(PreparedStatement ps) throws SQLException {
+        if (ps != null) {
+            ps.clearParameters();
+            ps.close();
         }
     }
 
-    public static void clearBatchStatemt(PreparedStatement ps) {
-        try {
-            if (ps != null) {
-                ps.clearParameters();
-                ps.clearBatch();
-                ps.close();
-            }
-        } catch (SQLException e) {
-
+    public static void clearBatchStatemt(PreparedStatement ps) throws SQLException {
+        if (ps != null) {
+            ps.clearParameters();
+            ps.clearBatch();
+            ps.close();
         }
     }
 }

@@ -16,7 +16,7 @@ import java.util.Map;
 public class DataSetUtils {
 
     public static DataSet getDataSet(ResultSet rs, boolean autoCloseResultSet) throws SQLException {
-        if(rs==null){
+        if (rs == null) {
             return new DataSetImpl();
         }
         try {
@@ -33,11 +33,8 @@ public class DataSetUtils {
             return new DataSetImpl(dataRowSets);
         } finally {
             if (autoCloseResultSet) {
-                try {
-                    if (!rs.isClosed())
-                        rs.close();
-                }catch (SQLException e){
-                }
+                if (!rs.isClosed())
+                    rs.close();
             }
         }
     }

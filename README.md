@@ -113,14 +113,14 @@ boolean ok=jdbcUtils.delete(foo);
  ``` java
  Map<String,Object> paramMap=new HashMap<>();
  paramMap.put("Foo1","123");
- List<Foo> list= jdbcUtils.queryForListP("select * from t_foo where foo_1=:foo1",paramMap,Foo.class);
+ List<Foo> list= jdbcUtils.queryForListPh("select * from t_foo where foo_1=:foo1",paramMap,Foo.class);
  ```
  第二种写法，设置BeanSource
  ``` java
  Foo foo=new Foo();
  foo.setFoo1("123");
  BeanSource beanSource=new BeanSource(foo);
- List<Foo> list= jdbcUtils.queryForListP("select * from t_foo where foo_1=:foo1",beanSource,Foo.class);
+ List<Foo> list= jdbcUtils.queryForListPh("select * from t_foo where foo_1=:foo1",beanSource,Foo.class);
 ```
  
  

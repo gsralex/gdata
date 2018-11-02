@@ -9,6 +9,7 @@ import com.gsralex.gdata.bean.mapper.MapperHolder;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
