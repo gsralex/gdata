@@ -25,9 +25,7 @@ PS：插一句其他的，我个人不喜欢MyBatis的sql语句的处理方式�
  ``` java
  JdbcUtils jdbcUtils = new JdbcUtils(DataSourceConfg.getDataSource());
  @Table(name = "t_foo") //如果数据库表名与类名相同，可以不用写@Table注解 
-                        //@Table用于insert,update,delete,Model仅查询的话，不用写@Table，因为在sql语句已经写了表名
- public class Foo {
-
+ public class Foo {     //@Table用于insert,update,delete,Model仅查询的话，不用写@Table，因为在sql语句已经写了表名
     @Id
     @Column(name = "id") //如果数据库字段名与类字段名相同，可以不用写@Column注解
     private Long id;
