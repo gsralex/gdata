@@ -144,7 +144,7 @@ boolean ok=jdbcUtils.delete(foo);
 
 修改日志
 --------
-### v1.076(2018-11-01)
+### v1.077(2018-11-02)
 - 修复了bug，移出对springtemplate的支持  
 ### v1.06(2018-04-05)
 - 支持手动事务，支持mysql,oralce,sqlserver，支持占位符语法

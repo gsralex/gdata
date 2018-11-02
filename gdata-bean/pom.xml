@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.gsralex</groupId>
         <artifactId>gdata</artifactId>
-        <version>1.076</version>
+        <version>1.077</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
