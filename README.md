@@ -24,7 +24,8 @@ PS：插一句其他的，我个人不喜欢MyBatis的sql语句的处理方式�
 
  ``` java
  JdbcUtils jdbcUtils = new JdbcUtils(DataSourceConfg.getDataSource());
- @Table(name = "t_foo")
+ @Table(name = "t_foo") //如果数据库表名与类名相同，可以不用写@Table注解 
+                        //@Table用于insert,update,delete,Model仅查询的话，不用写@Table，因为在sql语句已经写了表名
  public class Foo {
 
     @Id
@@ -87,7 +88,7 @@ public class Vo {
    
     private Integer foo5;//db field foo5
 	
-    private Integer nodb_foo6;//not a db field 不会赋值
+    private Integer nodb_foo6;//not a db field 不会赋值，会根据ResultSetMetaData来判断返回sql是否存在来赋值
     
     private Double nodb_foo7;//not a db field 不会赋值
 }
