@@ -3,10 +3,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.gsralex</groupId>
-    <artifactId>gdata</artifactId>
+    <groupId>com.gsralex.gdata</groupId>
+    <artifactId>gdata-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.077</version>
+    <version>1.078</version>
     <modules>
         <module>gdata-bean</module>
     </modules>

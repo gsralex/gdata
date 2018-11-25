@@ -172,7 +172,6 @@ public class JdbcUtils {
         return executeBatch(sql, objects, false).getResult();
     }
 
-
     public int executeUpdate(String sql, Object[] objects) {
         return executeUpdate(sql, objects, false).getResult();
     }
@@ -186,7 +185,6 @@ public class JdbcUtils {
         SqlObject sqlObject = ValueConverterImpl.getInstance().convertBeanSource(pSql, beanSource);
         return executeUpdate(sqlObject.getSql(), sqlObject.getObjects());
     }
-
 
     public <T> T queryForObject(String sql, Object[] objects, Class<T> type) {
         List<T> list = queryForList(sql, objects, type);
