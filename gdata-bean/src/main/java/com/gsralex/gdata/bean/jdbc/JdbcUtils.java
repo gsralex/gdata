@@ -211,10 +211,10 @@ public class JdbcUtils {
     }
 
     public <T> List<T> queryForList(String sql, Object[] objects, Class<T> type) {
-        List<T> list = new ArrayList<>();
-        executeQuery(sql, objects, new ResultCallback() {
+        class QueryCallback implements ResultCallback<List<T>> {
             @Override
-            public void mapper(ResultSet rs) {
+            public List<T> mapper(ResultSet rs) {
+                List<T> list = new ArrayList<>();
                 try {
                     Set<String> columnSet = JdbcHelper.getColumnLabelSet(rs.getMetaData());
                     while (rs.next()) {
@@ -223,9 +223,10 @@ public class JdbcUtils {
                 } catch (Exception e) {
                     throw new DataException("queryForList", e);
                 }
+                return list;
             }
-        });
-        return list;
+        }
+        return executeQuery(sql, objects, new QueryCallback());
     }
 
     public <T> List<T> queryForListPh(String pSql, Map<String, Object> paramMap, Class<T> type) {
@@ -239,17 +240,17 @@ public class JdbcUtils {
     }
 
     public DataSet queryForDataSet(String sql, Object... objects) {
-        final DataSet[] dataSet = {null};
-        executeQuery(sql, objects, new ResultCallback() {
+        class QueryCallback implements ResultCallback<DataSet> {
             @Override
-            public void mapper(ResultSet rs) {
+            public DataSet mapper(ResultSet rs) {
                 try {
-                    dataSet[0] = DataSetUtils.getDataSet(rs, false);
+                    return DataSetUtils.getDataSet(rs, false);
                 } catch (SQLException e) {
+                    throw new DataException("queryForDataSet", e);
                 }
             }
-        });
-        return dataSet[0];
+        }
+        return executeQuery(sql, objects, new QueryCallback());
     }
 
     public DataSet queryForDataSetPh(String pSql, Map<String, Object> paramMap) {
@@ -315,32 +316,57 @@ public class JdbcUtils {
 
     //事务支持
 
-    public void setAutoCommit(boolean autoCommit) throws SQLException {
-        Connection connection = JdbcConnHolder.getConnection(this.dataSource);
-        connection.setAutoCommit(autoCommit);
-    }
-
-    public boolean getAutoCommit() throws SQLException {
-        Connection connection = JdbcConnHolder.getConnection(this.dataSource);
-        return connection.getAutoCommit();
-    }
-
-    public void commit() throws SQLException {
-        Connection connection = JdbcConnHolder.getConnection(this.dataSource);
+    public void setAutoCommit(boolean autoCommit) {
+        Connection conn;
         try {
-            connection.commit();
-        } finally {
-            JdbcConnHolder.closeConnection();
+            conn = JdbcConnHolder.getConnection(this.dataSource);
+            conn.setAutoCommit(autoCommit);
+        } catch (SQLException e) {
+            throw new DataException("setAutoCommit", e);
         }
     }
 
-    public void rollback() throws SQLException {
-        Connection connection = JdbcConnHolder.getConnection(this.dataSource);
-        connection.rollback();
+    public boolean getAutoCommit() {
+        Connection conn;
+        try {
+            conn = JdbcConnHolder.getConnection(this.dataSource);
+            return conn.getAutoCommit();
+        } catch (SQLException e) {
+            throw new DataException("setAutoCommit", e);
+        }
+    }
+
+    public void commit() {
+        Connection conn;
+        try {
+            conn = JdbcConnHolder.getConnection(this.dataSource);
+            conn.commit();
+        } catch (SQLException e) {
+            throw new DataException("commit", e);
+        }
     }
 
 
-    private void executeQuery(String sql, Object[] objects, ResultCallback resultCallback) {
+    public void rollback() {
+        Connection conn;
+        try {
+            conn = JdbcConnHolder.getConnection(this.dataSource);
+            conn.rollback();
+        } catch (SQLException e) {
+            throw new DataException("rollback", e);
+        }
+    }
+
+    public void close() {
+        try {
+            JdbcConnHolder.closeConnection();
+        } catch (SQLException e) {
+            throw new DataException("close", e);
+        }
+    }
+
+
+    private <T> T executeQuery(String sql, Object[] objects, ResultCallback<T> resultCallback) {
         try {
             PreparedStatement ps = null;
             ResultSet rs = null;
@@ -353,9 +379,7 @@ public class JdbcUtils {
                     }
                 }
                 rs = ps.executeQuery();
-                if (resultCallback != null) {
-                    resultCallback.mapper(rs);
-                }
+                return resultCallback.mapper(rs);
             } finally {
                 ResultUtils.closeResultSet(rs);
                 PreparedStatementUtils.clearStatement(ps);
@@ -407,7 +431,6 @@ public class JdbcUtils {
             PreparedStatement ps = null;
             try {
                 Connection conn = JdbcConnHolder.getConnection(this.dataSource);
-                conn.setAutoCommit(false);
                 if (autoGeneratedKeys) {
                     ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 } else {
@@ -424,7 +447,6 @@ public class JdbcUtils {
                     }
                 }
                 int[] r = ps.executeBatch();
-                ps.getConnection().commit();
                 int result = JdbcHelper.getBatchResult(r);
                 DataSet dataSet = null;
                 if (autoGeneratedKeys) {

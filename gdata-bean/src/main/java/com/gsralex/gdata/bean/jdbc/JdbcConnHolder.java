@@ -27,7 +27,7 @@ public class JdbcConnHolder {
         Connection conn = connPool.get();
         if (conn != null && !conn.isClosed()) {
             conn.close();
-            connPool.set(null);
+            connPool.remove();
         }
     }
 }

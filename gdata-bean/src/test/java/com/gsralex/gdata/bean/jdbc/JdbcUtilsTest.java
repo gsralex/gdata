@@ -190,23 +190,31 @@ public class JdbcUtilsTest {
 
     @Test
     public void transaction() {
-        try {
-            Foo foo = FooSource.getEntity();
-            jdbcUtils.setAutoCommit(false);
-            jdbcUtils.insert(foo, true);
-            Foo data = jdbcUtils.queryForObject("select * from t_foo where id=? ", new Object[]{foo.getId()}, Foo.class);
-            Foo foo1 = FooSource.getEntity();
-            jdbcUtils.insert(foo1, true);
-            Assert.assertNotEquals(foo1.getId(), 0);
-            jdbcUtils.rollback();
-            jdbcUtils.setAutoCommit(true);
-            Foo foo2 = FooSource.getEntity();
-            jdbcUtils.insert(foo2, true);
-            Assert.assertEquals(foo2.getId(), foo1.getId() + 1);
-            Assert.assertNotEquals(getData(foo2.getId()), null);
-        } catch (SQLException e) {
-            throw new DataException("transaction", e);
-        }
+        Foo foo = FooSource.getEntity();
+        jdbcUtils.setAutoCommit(false);
+        jdbcUtils.insert(foo, true);
+        Foo data = jdbcUtils.queryForObject("select * from t_foo where id=? ", new Object[]{foo.getId()}, Foo.class);
+        Foo foo1 = FooSource.getEntity();
+        jdbcUtils.insert(foo1, true);
+        Assert.assertNotEquals(foo1.getId(), 0);
+
+        List<Foo> list = new ArrayList<>();
+        Foo foo3 = FooSource.getEntity();
+        Foo foo4 = FooSource.getEntity();
+        list.add(foo3);
+        list.add(foo4);
+        jdbcUtils.batchInsert(list, true);
+        Assert.assertNotEquals(foo3.getId(), 0);
+        Assert.assertNotEquals(foo4.getId(), 0);
+
+
+        jdbcUtils.rollback();
+        jdbcUtils.commit();
+        jdbcUtils.close();
+        Foo foo2 = FooSource.getEntity();
+        jdbcUtils.insert(foo2, true);
+        Assert.assertEquals(foo2.getId(), foo1.getId() + 3);
+        Assert.assertNotEquals(getData(foo2.getId()), null);
     }
 
     public Foo getData(long id) {

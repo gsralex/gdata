@@ -6,7 +6,7 @@ import java.sql.ResultSet;
  * @author gsralex
  * @version 2018/4/1
  */
-public interface ResultCallback {
+public interface ResultCallback<T> {
 
-    void mapper(ResultSet rs);
+    T mapper(ResultSet rs);
 }
