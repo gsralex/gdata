@@ -6,7 +6,7 @@
     <groupId>com.gsralex.gdata</groupId>
     <artifactId>gdata-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.078</version>
+    <version>1.079</version>
     <modules>
         <module>gdata-bean</module>
     </modules>
@@ -24,7 +24,6 @@
 
     <properties>
         <junit.version>4.12</junit.version>
-        <commonslang3.version>3.4</commonslang3.version>
         <log4j.version>1.2.17</log4j.version>
         <dbcp.version>1.4</dbcp.version>
         <mysql.version>5.1.46</mysql.version>
@@ -66,12 +65,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>${commonslang3.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>${log4j.version}</version>
@@ -95,19 +88,19 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>${mavenplugin.gpg.version}</version>
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-gpg-plugin</artifactId>-->
+                <!--<version>${mavenplugin.gpg.version}</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<phase>verify</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>sign</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -141,17 +134,17 @@
         </plugins>
     </build>
 
-    <distributionManagement>
-        <repository>
-            <id>oss-releases</id>
-            <name>oss-releases</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-        <snapshotRepository>
-            <id>oss-snapshots</id>
-            <name>oss-snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
+    <!--<distributionManagement>-->
+        <!--<repository>-->
+            <!--<id>oss-releases</id>-->
+            <!--<name>oss-releases</name>-->
+            <!--<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>-->
+        <!--</repository>-->
+        <!--<snapshotRepository>-->
+            <!--<id>oss-snapshots</id>-->
+            <!--<name>oss-snapshots</name>-->
+            <!--<url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
+        <!--</snapshotRepository>-->
+    <!--</distributionManagement>-->
 
 </project>

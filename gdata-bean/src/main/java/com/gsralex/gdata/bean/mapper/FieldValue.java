@@ -2,9 +2,7 @@ package com.gsralex.gdata.bean.mapper;
 
 
 import com.gsralex.gdata.bean.exception.DataException;
-import org.apache.commons.lang3.StringUtils;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -147,7 +145,10 @@ public class FieldValue {
     }
 
     private static String getGetNoIsMethodName(String fieldName) {
-        String noIsMethodName = StringUtils.removeStart(fieldName, "is");
+        String noIsMethodName = fieldName;
+        if (fieldName.startsWith("is")) {
+            noIsMethodName = fieldName.substring(2);
+        }
         return "get" + getInitCapsMethodName(noIsMethodName);
     }
 
@@ -157,7 +158,10 @@ public class FieldValue {
     }
 
     private static String getSetNoIsMethodName(String fieldName) {
-        String noIsMethodName = StringUtils.removeStart(fieldName, "is");
+        String noIsMethodName = fieldName;
+        if (fieldName.startsWith("is")) {
+            noIsMethodName = fieldName.substring(2);
+        }
         return "set" + getInitCapsMethodName(noIsMethodName);
     }
 

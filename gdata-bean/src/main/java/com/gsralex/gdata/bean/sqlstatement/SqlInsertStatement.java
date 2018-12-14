@@ -9,6 +9,7 @@ import com.gsralex.gdata.bean.result.DataRowSet;
 import com.gsralex.gdata.bean.mapper.TypeUtils;
 
 import javax.sql.DataSource;
+import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +73,7 @@ public class SqlInsertStatement implements SqlStatement {
             for (T t : list) {
                 FieldValue fieldValue = new FieldValue(t);
                 for (FieldColumn column : columnList) {
-                    Long longValue = (Long) keyList.get(row++);//key default long value
+                    BigInteger longValue = (BigInteger) keyList.get(row++);//key default long value
                     if (longValue != null) {
                         Object value = null;
                         if (column.getType() == Integer.class || column.getType() == int.class) {
@@ -86,7 +87,7 @@ public class SqlInsertStatement implements SqlStatement {
                         } else if (column.getType() == Byte.class || column.getType() == byte.class) {
                             value = longValue.byteValue();
                         } else if (column.getType() == Long.class || column.getType() == long.class) {
-                            value = longValue;
+                            value = longValue.longValue();
                         }
                         fieldValue.setValue(column.getType(), column.getName(), value);
                     }

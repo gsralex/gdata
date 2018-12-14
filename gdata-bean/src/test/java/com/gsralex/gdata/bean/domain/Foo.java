@@ -15,7 +15,7 @@ import java.util.Date;
 public class Foo {
 
     @Id
-    private int id;
+    private Long id;
 
     @Column(name = "foo_1")
     private String foo1;
@@ -43,11 +43,11 @@ public class Foo {
     private Boolean isFoo6;
 
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

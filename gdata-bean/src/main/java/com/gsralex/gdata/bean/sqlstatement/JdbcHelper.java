@@ -1,7 +1,6 @@
 package com.gsralex.gdata.bean.sqlstatement;
 
 import com.gsralex.gdata.bean.exception.DataException;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -30,7 +29,7 @@ public class JdbcHelper {
 
         List<String> labelList = new ArrayList<>();
         for (int i = 0; i < columnCount; i++) {
-            String label = StringUtils.lowerCase(metaData.getColumnLabel(i + 1));
+            String label = metaData.getColumnLabel(i + 1).toLowerCase();
             labelList.add(label);
         }
         String[] labels = new String[labelList.size()];

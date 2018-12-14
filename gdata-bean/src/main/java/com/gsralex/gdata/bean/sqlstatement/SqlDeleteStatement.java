@@ -6,11 +6,8 @@ import com.gsralex.gdata.bean.mapper.FieldColumn;
 import com.gsralex.gdata.bean.mapper.FieldValue;
 import com.gsralex.gdata.bean.mapper.Mapper;
 import com.gsralex.gdata.bean.mapper.MapperHolder;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.sql.DataSource;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +49,7 @@ public class SqlDeleteStatement implements SqlStatement {
                 sql.append(String.format(" %s=? and", label));
             }
         }
-        return StringUtils.removeEnd(sql.toString(), "and");
+        return sql.delete(sql.length()-3,sql.length()).toString();
     }
 
     @Override

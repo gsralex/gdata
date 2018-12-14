@@ -5,7 +5,6 @@ import com.gsralex.gdata.bean.annotation.Column;
 import com.gsralex.gdata.bean.annotation.Id;
 import com.gsralex.gdata.bean.annotation.Ignore;
 import com.gsralex.gdata.bean.annotation.Table;
-import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -72,7 +71,7 @@ public class MapperHolder {
             }
 
 
-            if (StringUtils.isEmpty(column.getLabel())) {
+            if (column.getLabel()==null || column.getLabel().length()==0) {
                 column.setName(field.getName());
                 column.setLabel(field.getName());
             }

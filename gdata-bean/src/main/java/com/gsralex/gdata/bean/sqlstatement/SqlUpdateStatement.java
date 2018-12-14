@@ -6,10 +6,8 @@ import com.gsralex.gdata.bean.mapper.FieldColumn;
 import com.gsralex.gdata.bean.mapper.FieldValue;
 import com.gsralex.gdata.bean.mapper.Mapper;
 import com.gsralex.gdata.bean.mapper.MapperHolder;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +56,7 @@ public class SqlUpdateStatement implements SqlStatement {
                 sql.append(String.format(" `%s`=? and", column.getLabel()));
             }
         }
-        return StringUtils.remove(sql.toString(), "and");
+        return sql.delete(sql.length()-3,sql.length()).toString();
     }
 
     @Override

@@ -1,8 +1,6 @@
 package com.gsralex.gdata.bean.sqlstatement;
 
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * @author gsralex
  * @version 2018/4/2

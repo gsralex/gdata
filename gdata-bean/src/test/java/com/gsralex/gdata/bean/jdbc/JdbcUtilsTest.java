@@ -4,16 +4,13 @@ import com.gsralex.gdata.bean.DataSourceConfg;
 import com.gsralex.gdata.bean.domain.FooSource;
 import com.gsralex.gdata.bean.domain.Foo;
 import com.gsralex.gdata.bean.domain.FooVo;
-import com.gsralex.gdata.bean.exception.DataException;
 import com.gsralex.gdata.bean.placeholder.BeanSource;
 import com.gsralex.gdata.bean.result.DataSet;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -38,7 +35,7 @@ public class JdbcUtilsTest {
         Foo foo = FooSource.getEntity();
         foo.setFoo6(null);
         jdbcUtils.insert(foo, true);
-        Assert.assertNotEquals(0, foo.getId());
+        Assert.assertNotEquals(0, foo.getId().longValue());
         String sql = "select * from t_foo where id=?";
         Foo fooData = jdbcUtils.queryForObject(sql, new Object[]{foo.getId()}, Foo.class);
         Assert.assertEquals(fooData.getFoo6(), null);
@@ -50,7 +47,7 @@ public class JdbcUtilsTest {
         List<Foo> list = FooSource.getEntityList();
         int r = jdbcUtils.batchInsert(list, true);
         Assert.assertEquals(r, 2);
-        Assert.assertNotEquals(list.get(0).getId(), 0);
+        Assert.assertNotEquals(list.get(0).getId().longValue(), 0);
         Assert.assertEquals(list.get(0).getId() < list.get(1).getId(), true);
 
     }
@@ -112,9 +109,10 @@ public class JdbcUtilsTest {
         //date test
         String nullTime = "00:00:00";
         String hhmmss = "HH:mm:ss";
-        String nowH = DateFormatUtils.format(now, hhmmss);
-        String dataH = DateFormatUtils.format(fooData.getFooDate(), hhmmss);
-        if (!StringUtils.equals(nowH, nullTime)) {
+        SimpleDateFormat sdf=new SimpleDateFormat(hhmmss);
+        String nowH = sdf.format(now);
+        String dataH = sdf.format(fooData.getFooDate());
+        if (nowH.equals(nullTime)) {
             Assert.assertNotEquals(dataH, nullTime);
         }
     }
@@ -196,7 +194,7 @@ public class JdbcUtilsTest {
         Foo data = jdbcUtils.queryForObject("select * from t_foo where id=? ", new Object[]{foo.getId()}, Foo.class);
         Foo foo1 = FooSource.getEntity();
         jdbcUtils.insert(foo1, true);
-        Assert.assertNotEquals(foo1.getId(), 0);
+        Assert.assertNotEquals(foo1.getId().longValue(), 0);
 
         List<Foo> list = new ArrayList<>();
         Foo foo3 = FooSource.getEntity();
@@ -204,8 +202,8 @@ public class JdbcUtilsTest {
         list.add(foo3);
         list.add(foo4);
         jdbcUtils.batchInsert(list, true);
-        Assert.assertNotEquals(foo3.getId(), 0);
-        Assert.assertNotEquals(foo4.getId(), 0);
+        Assert.assertNotEquals(foo3.getId().longValue(), 0);
+        Assert.assertNotEquals(foo4.getId().longValue(), 0);
 
 
         jdbcUtils.rollback();
@@ -213,7 +211,7 @@ public class JdbcUtilsTest {
         jdbcUtils.close();
         Foo foo2 = FooSource.getEntity();
         jdbcUtils.insert(foo2, true);
-        Assert.assertEquals(foo2.getId(), foo1.getId() + 3);
+        Assert.assertEquals(foo2.getId().longValue(), foo1.getId().longValue() + 3);
         Assert.assertNotEquals(getData(foo2.getId()), null);
     }
 

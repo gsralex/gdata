@@ -1,7 +1,5 @@
 package com.gsralex.gdata.bean.mapper;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -36,7 +34,7 @@ public class MapperHelper {
         Mapper mapper = MapperHolder.getMapperCache(type);
         FieldValue fieldValue = new FieldValue(instance);
         for (Map.Entry<String, FieldColumn> item : mapper.getMapper().entrySet()) {
-            String label = StringUtils.lowerCase(item.getValue().getLabel());
+            String label = item.getValue().getLabel().toLowerCase();
             if (columnSet.contains(label)) {
                 Class fieldType = item.getValue().getType();
                 Object object = getRsValue(resultSet, 0, label, fieldType);
@@ -64,7 +62,7 @@ public class MapperHelper {
     }
 
     public Object getRsValue(ResultSet rs, int columnIndex, String label, Class type) throws SQLException {
-        boolean isEmptyLabel = StringUtils.isEmpty(label);
+        boolean isEmptyLabel = label==null || label.length()==0;
         Object result;
         if (type == int.class || type == Integer.class) {
             result = isEmptyLabel ? rs.getInt(columnIndex) : rs.getInt(label);

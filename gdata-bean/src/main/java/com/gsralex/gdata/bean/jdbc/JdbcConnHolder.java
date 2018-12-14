@@ -1,7 +1,5 @@
 package com.gsralex.gdata.bean.jdbc;
 
-import com.gsralex.gdata.bean.exception.DataException;
-
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
