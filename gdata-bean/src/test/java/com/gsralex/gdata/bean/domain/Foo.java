@@ -11,35 +11,35 @@ import java.util.Date;
  * @author gsralex
  *         2018/3/10
  */
-@Table(name = "t_foo")
+@Table("t_foo")
 public class Foo {
 
     @Id
     private Long id;
 
-    @Column(name = "foo_1")
+    @Column("foo_1")
     private String foo1;
 
-    @Column(name = "foo_2")
+    @Column("foo_2")
     private double foo2;
 
-    @Column(name = "foo_3")
+    @Column("foo_3")
     private Date foo3;
 
-    @Column(name = "foo_4")
+    @Column("foo_4")
     private int foo4;
 
-    @Column(name = "foo_img")
+    @Column("foo_img")
     private String fooimg;
 
-    @Column(name = "foo_5")
+    @Column("foo_5")
     private boolean foo5;
 
-    @Column(name = "foo_date")
+    @Column("foo_date")
     private Date fooDate;
 
 
-    @Column(name = "foo_6")
+    @Column("foo_6")
     private Boolean isFoo6;
 
 

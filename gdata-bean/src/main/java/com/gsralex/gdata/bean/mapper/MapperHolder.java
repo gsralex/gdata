@@ -41,7 +41,7 @@ public class MapperHolder {
         String tableName;
         Table tbName = (Table) type.getAnnotation(Table.class);
         if (tbName != null) {
-            tableName = tbName.name();
+            tableName = tbName.value();
         } else {
             tableName = type.getSimpleName();
         }
@@ -67,7 +67,7 @@ public class MapperHolder {
             Column aliasField = field.getAnnotation(Column.class);
             if (aliasField != null) {
                 column.setName(field.getName());
-                column.setLabel(aliasField.name());
+                column.setLabel(aliasField.value());
             }
 
 
