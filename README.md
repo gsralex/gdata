@@ -24,22 +24,22 @@ PS：插一句其他的，我个人不喜欢MyBatis的sql语句的处理方式�
 
  ``` java
  JdbcUtils jdbcUtils = new JdbcUtils(DataSourceConfg.getDataSource());
- @Table(name = "t_foo") //如果数据库表名与类名相同，可以不用写@Table注解 
+ @Table("t_foo") //如果数据库表名与类名相同，可以不用写@Table注解 
  public class Foo {     //@Table用于insert,update,delete,Model仅查询的话，不用写@Table，因为在sql语句已经写了表名
     @Id
-    @Column(name = "id") //如果数据库字段名与类字段名相同，可以不用写@Column注解
+    @Column("id") //如果数据库字段名与类字段名相同，可以不用写@Column注解
     private Long id;
 
-    @Column(name = "foo_1")
+    @Column("foo_1")
     private String foo1;//db field foo_1
 
-    @Column(name = "foo_2")
+    @Column("foo_2")
     private Double foo2;//db field foo_2
 
-    @Column(name = "foo_3")
+    @Column("foo_3")
     private Date foo3;//db field foo_3
 
-    @Column(name = "foo_4")
+    @Column("foo_4")
     private Integer foo4;//db field foo_4
    
     private Integer foo5;//db field foo5
@@ -143,6 +143,8 @@ boolean ok=jdbcUtils.delete(foo);
 
 修改日志
 --------
+### v1.08(2018-12-18)
+- 修复了bug，注解精简 
 ### v1.077(2018-11-02)
 - 修复了bug，移出对springtemplate的支持  
 ### v1.06(2018-04-05)
