@@ -72,16 +72,16 @@ List<Foo> list=jdbcUtils.queryForList("select * from t_foo",null,Foo.class);
 
 public class Vo {
 
-    @Column(name = "foo_1")
+    @Column("foo_1")
     private String foo1;//db field foo_1
 
-    @Column(name = "foo_2")
+    @Column("foo_2")
     private Double foo2;//db field foo_2
 
-    @Column(name = "foo_3")
+    @Column("foo_3")
     private Date foo3;//db field foo_3
 
-    @Column(name = "foo_4")
+    @Column("foo_4")
     private Integer foo4;//db field foo_4
    
     private Integer foo5;//db field foo5
