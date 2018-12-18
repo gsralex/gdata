@@ -29,6 +29,7 @@ public class ValueConverterImplTest {
     public void convertMap() throws Exception {
         ValueConverter valueConverter = new ValueConverterImpl();
         Foo foo = FooSource.getEntity();
+        foo.setId(1L);
         String pSql = "select * from #table where id=:id and foo=:foo1 and id=:id";
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("Id", foo.getId());
