@@ -73,21 +73,28 @@ public class SqlInsertStatement implements SqlStatement {
             for (T t : list) {
                 FieldValue fieldValue = new FieldValue(t);
                 for (FieldColumn column : columnList) {
-                    BigInteger longValue = (BigInteger) keyList.get(row++);//key default long value
-                    if (longValue != null) {
+                    Object id = keyList.get(row++);
+                    BigInteger idValue = null;
+                    if (id.getClass() == Long.class) { //com.mysql.jdbc.Driver
+                        long value = ((Long) id).longValue();
+                        idValue = BigInteger.valueOf(value);
+                    } else if (id.getClass() == BigInteger.class) { //com.mysql.cj.jdbc.Driver
+                        idValue = (BigInteger) id;
+                    }
+                    if (idValue != null) {
                         Object value = null;
                         if (column.getType() == Integer.class || column.getType() == int.class) {
-                            value = longValue.intValue();
+                            value = idValue.intValue();
                         } else if (column.getType() == Short.class || column.getType() == short.class) {
-                            value = longValue.shortValue();
+                            value = idValue.shortValue();
                         } else if (column.getType() == Double.class || column.getType() == double.class) {
-                            value = longValue.doubleValue();
+                            value = idValue.doubleValue();
                         } else if (column.getType() == Float.class || column.getType() == float.class) {
-                            value = longValue.floatValue();
+                            value = idValue.floatValue();
                         } else if (column.getType() == Byte.class || column.getType() == byte.class) {
-                            value = longValue.byteValue();
+                            value = idValue.byteValue();
                         } else if (column.getType() == Long.class || column.getType() == long.class) {
-                            value = longValue.longValue();
+                            value = idValue.longValue();
                         }
                         fieldValue.setValue(column.getType(), column.getName(), value);
                     }
