@@ -14,7 +14,8 @@ import com.gsralex.gdata.bean.sqlstatement.SqlDeleteStatement;
 import com.gsralex.gdata.bean.sqlstatement.SqlInsertStatement;
 import com.gsralex.gdata.bean.sqlstatement.SqlUpdateStatement;
 import com.gsralex.gdata.bean.mapper.TypeUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -23,13 +24,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 /**
  * @author gsralex
  * @version 2018/3/10
  */
 public class JdbcUtils {
 
-    private static Logger LOGGER = Logger.getLogger(JdbcUtils.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(JdbcUtils.class);
 
     private DataSource dataSource;
     private SqlInsertStatement insertStatement;
