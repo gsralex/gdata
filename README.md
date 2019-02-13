@@ -4,13 +4,13 @@ jdbc,jdbctemplate bean
   
 Maven
 --------
-[![Maven Central](https://img.shields.io/maven-metadata/v/http/central.maven.org/maven2/com/gsralex/gdata/gdata-bean/maven-metadata.xml.svg)](http://mvnrepository.com/artifact/com.gsralex/gdata-bean)
+
 
  ``` java
  <dependency>
       <groupId>com.gsralex.gdata</groupId>
       <artifactId>gdata-bean</artifactId>
-      <version>${lastest.version}</version>
+      <version>1.10</version>
   </dependency>
 ```
 
