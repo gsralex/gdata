@@ -11,7 +11,7 @@ Maven
       <groupId>com.gsralex.gdata</groupId>
       <artifactId>gdata-bean</artifactId>
       <version>1.10</version>
-  </dependency>
+ </dependency>
 ```
 
 例子
