@@ -64,9 +64,9 @@ public class SqlDeleteStatement implements SqlStatement {
                 objects.add(value);
             }
         }
-        Object[] objArray = new Object[objects.size()];
-        objects.toArray(objArray);
-        return objArray;
+        Object[] objArr = new Object[objects.size()];
+        objects.toArray(objArr);
+        return objArr;
     }
 
 
